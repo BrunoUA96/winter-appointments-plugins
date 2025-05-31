@@ -1,0 +1,5 @@
+fields:
+    google_calendar_id:
+        label: 'Google Calendar ID'
+        type: text
+        comment: 'ID календаря, в который будут добавляться записи (например: example@gmail.com)'

@@ -1,0 +1,27 @@
+plugin:
+    name: 'doctor.appointments::lang.plugin.name'
+    description: 'doctor.appointments::lang.plugin.description'
+    author: Doctor
+    icon: 'far icon-calendar-plus'
+    replaces: {  }
+navigation:
+    main-menu-item:
+        label: Appointments
+        url: doctor/appointments/appointments
+        icon: icon-calendar
+        permissions:
+            - doctor.appointments.appointments
+            - doctor.appointments.consultation_types
+        sideMenu:
+            side-menu-appointments:
+                label: Appointments
+                url: doctor/appointments/appointments
+                icon: 'far icon-calendar-plus'
+                permissions:
+                    - doctor.appointments.appointments
+            side-menu-consultation-types:
+                label: 'Consultation Types'
+                url: doctor/appointments/consultationtypes
+                icon: icon-align-left
+                permissions:
+                    - doctor.appointments.consultation_types

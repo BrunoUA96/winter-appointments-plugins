@@ -1,0 +1,111 @@
+<form
+    data-request="onSaveBooking"
+    data-request-validate
+    data-request-success="handleSuccess"
+    data-request-error="handleError"
+    data-request-update="'@default': ''"
+    data-request-flash
+    data-request-data="{}">
+    
+    <div class="form-group">
+        <label for="patient_name">Ваше имя</label>
+        <input type="text" class="form-control" id="patient_name" name="patient_name" required>
+    </div>
+
+    <div class="form-group">
+        <label for="consultation_type_id">Тип консультации</label>
+        <select class="form-control" id="consultation_type_id" name="consultation_type_id" required>
+            <option value="">Выберите тип консультации</option>
+            {% for id, name in consultationTypes %}
+                <option value="{{ id }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="appointment_time">Время приема</label>
+        <select class="form-control" id="appointment_time" name="appointment_time" required>
+            <option value="">Выберите время</option>
+            {% for time in availableTimes %}
+                <option value="{{ time }}">{{ time }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="description">Описание</label>
+        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary" data-attach-loading>Записаться</button>
+</form>
+
+<script>
+console.log('Script loaded');
+
+// Глобальные функции для обработки AJAX-запросов
+window.handleSuccess = function(response) {
+    console.log('Success handler called with response:', response);
+    console.log('Response type:', typeof response);
+    console.log('Response keys:', Object.keys(response));
+    
+    // Проверяем наличие URL для перенаправления
+    if (response.redirect) {
+        console.log('Redirecting to:', response.redirect);
+        // Добавляем небольшую задержку перед перенаправлением
+        setTimeout(function() {
+            window.location.href = response.redirect;
+        }, 100);
+        return;
+    }
+    
+    // Если нет перенаправления, обновляем форму
+    console.log('No redirect URL found, updating form');
+    if (response['@default']) {
+        document.querySelector('form').outerHTML = response['@default'];
+    }
+};
+
+window.handleError = function(response) {
+    console.log('Error handler called with response:', response);
+    console.log('Response type:', typeof response);
+    console.log('Response keys:', Object.keys(response));
+    alert('Произошла ошибка: ' + response.message);
+};
+
+// Проверка, что функции определены
+console.log('handleSuccess defined:', typeof window.handleSuccess === 'function');
+console.log('handleError defined:', typeof window.handleError === 'function');
+
+// Добавляем обработчик отправки формы
+document.querySelector('form').addEventListener('submit', function(e) {
+    console.log('Form submitted');
+    
+    // Проверяем значения полей формы
+    const formData = new FormData(this);
+    console.log('Form fields:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+    
+    // Проверяем, что все обязательные поля заполнены
+    const requiredFields = ['patient_name', 'consultation_type_id', 'appointment_time'];
+    const missingFields = requiredFields.filter(field => !formData.get(field));
+    
+    if (missingFields.length > 0) {
+        console.log('Missing required fields:', missingFields);
+        e.preventDefault();
+        alert('Пожалуйста, заполните все обязательные поля');
+        return;
+    }
+    
+    console.log('All required fields are filled');
+});
+
+// Добавляем обработчики изменения полей для отладки
+document.querySelectorAll('input, select, textarea').forEach(field => {
+    field.addEventListener('change', function(e) {
+        console.log(`Field ${this.name} changed to:`, this.value);
+    });
+});
+</script>

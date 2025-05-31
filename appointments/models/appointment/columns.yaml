@@ -1,0 +1,25 @@
+list: ~/plugins/doctor/appointments/controllers/appointments/config_list.yaml
+columns:
+    id:
+        label: id
+        type: number
+    patient_name:
+        label: Patient name
+        type: text
+        searchable: true
+    appointment_time:
+        label: Appointment time
+        type: text
+        searchable: true
+    consultation_type:
+        label: Consultation type
+        relation: consultation_type
+        select: name
+        searchable: true
+    created_at:
+        label: Created at
+        type: datetime
+    description:
+        label: Description
+        type: text
+        searchable: true

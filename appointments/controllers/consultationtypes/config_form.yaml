@@ -1,0 +1,11 @@
+name: ConsultationTypes
+modelClass: Doctor\Appointments\Models\ConsultationType
+form: $/doctor/appointments/models/consultationtype/fields.yaml
+defaultRedirect: doctor/appointments/consultationtypes
+create:
+    redirect: 'doctor/appointments/consultationtypes/update/:id'
+    redirectClose: doctor/appointments/consultationtypes
+update:
+    redirect: doctor/appointments/consultationtypes
+    redirectClose: doctor/appointments/consultationtypes
+preview: {  }

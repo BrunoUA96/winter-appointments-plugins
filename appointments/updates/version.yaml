@@ -1,0 +1,11 @@
+1.0.1:
+    - 'Initialize plugin.'
+1.0.2:
+    - 'Created table doctor_appointments_consultation_type'
+    - builder_table_create_doctor_appointments_consultation_type.php
+1.0.3:
+    - 'Updated table doctor_appointments_consultation_type'
+    - builder_table_update_doctor_appointments_consultation_type.php
+1.0.4:
+    - 'Created table doctor_appointments_appointments'
+    - builder_table_create_doctor_appointments_appointments.php

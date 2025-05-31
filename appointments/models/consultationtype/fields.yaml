@@ -1,0 +1,9 @@
+fields:
+    name:
+        label: Name
+        span: auto
+        type: textarea
+    duration:
+        label: Duration
+        span: auto
+        type: number

@@ -1,0 +1,9 @@
+columns:
+    name:
+        label: name
+        type: text
+        searchable: true
+    duration:
+        label: duration
+        type: number
+        searchable: true

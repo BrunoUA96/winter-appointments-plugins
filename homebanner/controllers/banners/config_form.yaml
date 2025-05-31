@@ -1,0 +1,10 @@
+name: Banners
+modelClass: Doctor\HomeBanner\Models\Banner
+form: $/doctor/homebanner/models/banner/fields.yaml
+defaultRedirect: doctor/homebanner/banners
+create:
+    redirect: 'doctor/homebanner/banners/update/:id'
+    redirectClose: doctor/homebanner/banners
+update:
+    redirect: doctor/homebanner/banners
+    redirectClose: doctor/homebanner/banners

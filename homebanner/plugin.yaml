@@ -1,0 +1,17 @@
+plugin:
+    name: 'doctor.homebanner::lang.plugin.name'
+    description: 'doctor.homebanner::lang.plugin.description'
+    author: doctor
+    icon: 'far icon-images'
+    replaces: {  }
+navigation:
+    main-menu-item:
+        label: Banners
+        url: doctor/homebanner/banners
+        icon: icon-image
+        permissions:
+            - doctor.homebanner.manage_banners
+permissions:
+    doctor.homebanner.manage_banners:
+        tab: 'doctor.homebanner::lang.plugin.name'
+        label: 'doctor.homebanner::lang.plugin.name'

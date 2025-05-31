@@ -1,0 +1,19 @@
+columns:
+    title:
+        label: Title
+        type: text
+        searchable: true
+        sortable: true
+    updated_at:
+        label: updated_at
+        type: datetime
+        searchable: true
+        sortable: true
+    subtitle:
+        label: subtitle
+        type: text
+        searchable: true
+        sortable: true
+    image:
+        label: image
+        type: text
