@@ -9,3 +9,9 @@
 1.0.4:
     - 'Created table doctor_appointments_appointments'
     - builder_table_create_doctor_appointments_appointments.php
+1.0.5:
+    - 'Updated table doctor_appointments_appointments'
+    - builder_table_update_doctor_appointments_appointments.php
+1.0.6:
+    - 'Updated table doctor_appointments_appointments'
+    - builder_table_update_doctor_appointments_appointments_2.php

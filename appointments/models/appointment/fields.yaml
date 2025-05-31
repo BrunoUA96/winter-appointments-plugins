@@ -1,14 +1,21 @@
 fields:
     patient_name:
-        label: 'Patient name'
-        size: ''
+        label: Name
         span: auto
-        type: textarea
+        type: text
     appointment_time:
         label: 'Appointment time'
         mode: datetime
         span: auto
         type: datepicker
+    phone:
+        label: Phone
+        span: auto
+        type: text
+    email:
+        label: Email
+        span: auto
+        type: text
     consultation_type:
         label: 'Consultation type'
         span: auto

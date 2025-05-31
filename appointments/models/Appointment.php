@@ -10,6 +10,11 @@ class Appointment extends Model
 
     protected $dates = ["deleted_at"];
     private static $isSyncing = false;
+    
+    /**
+     * @var array Attribute names to encode and decode using JSON.
+     */
+    public $jsonable = [];
 
     public function getConsultationTypeOptions()
     {
@@ -23,7 +28,9 @@ class Appointment extends Model
         "appointment_time",
         "consultation_type_id",
         "description",
-        "google_event_id"
+        "google_event_id",
+        "email",
+        "phone"
     ];
 
     public $belongsTo = [

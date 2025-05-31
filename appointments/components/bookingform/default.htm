@@ -12,6 +12,16 @@
         <input type="text" class="form-control" id="patient_name" name="patient_name" required>
     </div>
 
+     <div class="form-group">
+        <label for="email">Емайл</label>
+        <input type="text" class="form-control" id="email" name="email" required>
+    </div>
+
+     <div class="form-group">
+        <label for="phone">Телефон</label>
+        <input type="text" class="form-control" id="phone" name="phone" required>
+    </div>
+
     <div class="form-group">
         <label for="consultation_type_id">Тип консультации</label>
         <select class="form-control" id="consultation_type_id" name="consultation_type_id" required>
@@ -89,7 +99,7 @@ document.querySelector('form').addEventListener('submit', function(e) {
     }
     
     // Проверяем, что все обязательные поля заполнены
-    const requiredFields = ['patient_name', 'consultation_type_id', 'appointment_time'];
+    const requiredFields = ['patient_name', 'consultation_type_id', 'appointment_time', 'email', 'phone'];
     const missingFields = requiredFields.filter(field => !formData.get(field));
     
     if (missingFields.length > 0) {

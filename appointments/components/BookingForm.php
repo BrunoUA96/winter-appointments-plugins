@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Request;
 use Winter\Storm\Support\Facades\Flash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Google\Client;
 use Google\Service\Calendar;
@@ -32,11 +33,28 @@ class BookingForm extends ComponentBase
         try {
             Log::info('Starting onSaveBooking');
             
+            // Валидация входных данных
+            $rules = [
+                'patient_name' => 'required',
+                'appointment_time' => 'required|date',
+                'consultation_type_id' => 'required|exists:doctor_appointments_consultation_type,id',
+                'email' => 'required|email',
+                'phone' => 'required|regex:/^\+?[0-9\s\-\(\)]+$/'
+            ];
+
+            $validation = Validator::make(Request::all(), $rules);
+
+            if ($validation->fails()) {
+                throw new \Exception($validation->errors()->first());
+            }
+            
             $appointment = new Appointment();
             $appointment->patient_name = Request::input('patient_name');
             $appointment->appointment_time = Carbon::parse(Request::input('appointment_time'));
             $appointment->consultation_type_id = Request::input('consultation_type_id');
             $appointment->description = Request::input('description');
+            $appointment->email = Request::input('email');
+            $appointment->phone = Request::input('phone');
             $appointment->save();
 
             Log::info('Appointment saved successfully');
