@@ -26,12 +26,27 @@ class BookingForm extends ComponentBase
     {
         $this->page['consultationTypes'] = ConsultationType::all()->pluck('name', 'id');
         $this->page['availableTimes'] = $this->getAvailableTimes();
+        $this->page['recaptcha_site_key'] = \Doctor\Appointments\Models\GoogleSettings::get('recaptcha_site_key');
     }
 
     public function onSaveBooking()
     {
         try {
             Log::info('Starting onSaveBooking');
+            
+            // Валидация reCAPTCHA
+            $recaptchaResponse = Request::input('g-recaptcha-response');
+            if (!$recaptchaResponse) {
+                throw new \Exception('Пожалуйста, подтвердите, что вы не робот');
+            }
+
+            $recaptchaSecret = \Doctor\Appointments\Models\GoogleSettings::get('recaptcha_secret_key');
+            $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret=' . $recaptchaSecret . '&response=' . $recaptchaResponse);
+            $responseData = json_decode($verifyResponse);
+            
+            if (!$responseData->success) {
+                throw new \Exception('Ошибка проверки reCAPTCHA');
+            }
             
             // Валидация входных данных
             $rules = [

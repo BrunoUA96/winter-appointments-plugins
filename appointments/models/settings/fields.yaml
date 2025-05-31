@@ -3,3 +3,11 @@ fields:
         label: 'Google Calendar ID'
         type: text
         comment: 'ID календаря, в который будут добавляться записи (например: example@gmail.com)'
+    recaptcha_site_key:
+        label: 'reCAPTCHA Site Key'
+        type: text
+        span: auto
+    recaptcha_secret_key:
+        label: 'reCAPTCHA Secret Key'
+        type: text
+        span: auto
