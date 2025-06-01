@@ -3,10 +3,10 @@
 use Cms\Classes\ComponentBase;
 use Doctor\Appointments\Models\Appointment;
 use Doctor\Appointments\Models\ConsultationType;
+use Doctor\Appointments\Models\User;
 use Illuminate\Support\Facades\Request;
 use Winter\Storm\Support\Facades\Flash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Google\Client;
@@ -65,11 +65,26 @@ class BookingForm extends ComponentBase
             
             $appointment = new Appointment();
             $appointment->patient_name = Request::input('patient_name');
+            $appointment->phone = Request::input('phone');
+
+            $user = User::firstOrCreate(
+                ['email' => Request::input('email')],
+                [
+                    'name' => Request::input('patient_name'),
+                    'phone' => Request::input('phone')
+                ]
+            );
+
+            if (Request::input('phone') && $user->phone !== Request::input('phone')) {
+                $user->phone = Request::input('phone');
+                $user->save();
+            }
+
             $appointment->appointment_time = Carbon::parse(Request::input('appointment_time'));
             $appointment->consultation_type_id = Request::input('consultation_type_id');
             $appointment->description = Request::input('description');
             $appointment->email = Request::input('email');
-            $appointment->phone = Request::input('phone');
+            $appointment->user_id = $user->id;
             $appointment->save();
 
             Log::info('Appointment saved successfully');

@@ -6,11 +6,12 @@ plugin:
     replaces: {  }
 navigation:
     main-menu-item:
-        label: Appointments
+        label: Doctor Booking
         url: doctor/appointments/appointments
-        icon: icon-calendar
+        icon: icon-stethoscope
         permissions:
             - doctor.appointments.appointments
+            - doctor.appointments.users
             - doctor.appointments.consultation_types
         sideMenu:
             side-menu-appointments:
@@ -19,9 +20,14 @@ navigation:
                 icon: 'far icon-calendar-plus'
                 permissions:
                     - doctor.appointments.appointments
+            side-menu-users:
+                label: Pacients
+                url: doctor/appointments/users
+                icon: icon-sitemap
+                permissions:
+                    - doctor.appointments.users
             side-menu-consultation-types:
                 label: 'Consultation Types'
                 url: doctor/appointments/consultationtypes
                 icon: icon-align-left
-                permissions:
-                    - doctor.appointments.consultation_types
+            

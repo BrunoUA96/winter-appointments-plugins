@@ -4,6 +4,7 @@ use System\Classes\PluginBase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Winter\Storm\Support\Facades\Flash;
+use Backend\Facades\Backend;
 
 class Plugin extends PluginBase
 {
@@ -79,7 +80,11 @@ class Plugin extends PluginBase
             'doctor.appointments.access_settings' => [
                 'tab' => 'Appointments',
                 'label' => 'Access settings'
+            ],
+            'doctor.appointments.users' => [
+                'tab' => 'Appointments',
+                'label' => 'Manage users'
             ]
         ];
-    }
+    }     
 }
