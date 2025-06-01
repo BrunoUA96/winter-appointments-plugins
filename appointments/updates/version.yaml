@@ -15,3 +15,15 @@
 1.0.6:
     - 'Updated table doctor_appointments_appointments'
     - builder_table_update_doctor_appointments_appointments_2.php
+1.0.7:
+    - 'Created table doctor_appointments_users'
+    - builder_table_create_doctor_appointments_users.php
+1.0.8:
+    - 'Drop table doctor_appointments_users'
+    - builder_table_delete_doctor_appointments_users.php
+1.0.9:
+    - 'Created table doctor_appointments_users'
+    - builder_table_create_doctor_appointments_users_2.php
+1.0.10:
+    - 'Add user_id to doctor_appointments_appointments'
+    - add_user_id_to_appointments.php
