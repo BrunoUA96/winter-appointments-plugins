@@ -1,0 +1,25 @@
+appointments:
+    label: Записи
+    view:
+        list:
+            columns:
+                appointment_time:
+                    label: Время записи
+                    type: datetime
+                    format: Y-m-d H:i
+                consultation_type:
+                    label: Тип консультации
+                    relation: consultation_type
+                    select: name
+                patient_name:
+                    label: Имя пациента
+                    type: text
+                description:
+                    label: Описание
+                    type: text
+            showCheckboxes: false
+            recordsPerPage: 50  # Увеличиваем количество записей на странице
+        showCheckboxes: false
+    manage:
+        showCheckboxes: false
+        enabled: false

@@ -30,12 +30,34 @@ class Appointment extends Model
         "description",
         "google_event_id",
         "email",
-        "phone"
+        "phone",
+        'user_id'
     ];
 
     public $belongsTo = [
-        "consultation_type" => \Doctor\Appointments\Models\ConsultationType::class
+        "consultation_type" => [
+            'Doctor\Appointments\Models\ConsultationType',
+            'key' => 'consultation_type_id'
+        ],
+        "user" => \Doctor\Appointments\Models\User::class
     ];
+
+    public function getDisplayNameAttribute()
+    {
+        $type = ConsultationType::find($this->consultation_type_id);
+        $typeName = $type ? $type->name : 'Нет типа';
+        $time = $this->appointment_time ? $this->appointment_time : 'Нет времени';
+        
+        return $typeName . ' ' . $time;
+    }
+
+    public function scopeFilterByUser($query, $user)
+    {
+        return $query->where(function($q) use ($user) {
+            $q->where('email', $user->email)
+              ->orWhere('phone', $user->phone);
+        });
+    }
 
     public function beforeSave()
     {

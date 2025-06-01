@@ -1,0 +1,79 @@
+<?php
+use Backend\Facades\Backend;
+?>
+
+<div class="control-panel">
+    <?php
+    // Debug information
+    echo '<div style="margin: 10px; padding: 10px; background: #f5f5f5;">';
+    echo 'User Email: ' . e($model->email) . '<br>';
+    echo 'User Phone: ' . e($model->phone) . '<br>';
+    
+    $appointments = \Doctor\Appointments\Models\Appointment::where(function($query) use ($model) {
+        $query->where('email', $model->email)
+              ->orWhere('phone', $model->phone);
+    })->get();
+    
+    echo 'Found appointments: ' . $appointments->count() . '<br>';
+    
+    // Debug SQL query
+    $query = \Doctor\Appointments\Models\Appointment::where(function($query) use ($model) {
+        $query->where('email', $model->email)
+              ->orWhere('phone', $model->phone);
+    });
+    echo 'SQL Query: ' . $query->toSql() . '<br>';
+    echo 'Bindings: ' . implode(', ', $query->getBindings());
+    echo '</div>';
+    ?>
+
+    <div class="table-container">
+        <table class="table data">
+            <thead>
+                <tr>
+                    <th class="list-cell-name-created_at list-cell-type-datetime list-cell-name-created_at">
+                        <span>Appointment Time</span>
+                    </th>
+                    <th class="list-cell-name-consultation_type list-cell-type-text list-cell-name-consultation_type">
+                        <span>Consultation Type</span>
+                    </th>
+                    <th class="list-cell-name-patient_name list-cell-type-text list-cell-name-patient_name">
+                        <span>Patient Name</span>
+                    </th>
+                    <th class="list-cell-name-description list-cell-type-text list-cell-name-description">
+                        <span>Description</span>
+                    </th>
+                    <th class="list-cell-name-actions list-cell-type-text list-cell-name-actions">
+                        <span>Actions</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                if ($appointments):
+                    foreach ($appointments as $appointment): ?>
+                        <tr>
+                            <td class="list-cell-name-created_at list-cell-type-datetime list-cell-name-created_at">
+                                <?= date('Y-m-d H:i', strtotime($appointment->appointment_time)) ?>
+                            </td>
+                            <td class="list-cell-name-consultation_type list-cell-type-text list-cell-name-consultation_type">
+                                <?= $appointment->consultation_type ? $appointment->consultation_type->name : 'Нет типа' ?>
+                            </td>
+                            <td class="list-cell-name-patient_name list-cell-type-text list-cell-name-patient_name">
+                                <?= e($appointment->patient_name) ?>
+                            </td>
+                            <td class="list-cell-name-description list-cell-type-text list-cell-name-description">
+                                <?= e($appointment->description) ?>
+                            </td>
+                            <td class="list-cell-name-actions list-cell-type-text list-cell-name-actions">
+                                <a href="<?= Backend::url('doctor/appointments/appointments/update/' . $appointment->id) ?>" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="icon-pencil"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach;
+                endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div> 

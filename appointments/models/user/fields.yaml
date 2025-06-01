@@ -1,0 +1,24 @@
+fields:
+    name:
+        label: Имя
+        type: text
+        readOnly: true
+        span: auto
+    email:
+        label: Email
+        type: text
+        readOnly: true
+        span: auto
+    phone:
+        label: Телефон
+        type: text
+        readOnly: true
+    section1:
+        label: Appointments List
+        span: full
+        type: section
+    appointments:
+
+        type: partial
+        path: ~/plugins/doctor/appointments/models/user/_appointments_list.htm
+        span: full
