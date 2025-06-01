@@ -1,0 +1,42 @@
+modelClass: Doctor\Appointments\Models\User
+relation:
+    appointments:
+        label: Записи
+        view:
+            list:
+                columns:
+                    appointment_time:
+                        label: Время записи
+                        type: datetime
+                        format: Y-m-d H:i
+                    consultation_type:
+                        label: Тип консультации
+                        relation: consultation_type
+                        select: name
+                    patient_name:
+                        label: Имя пациента
+                        type: text
+                    description:
+                        label: Описание
+                        type: text
+                showCheckboxes: false
+                recordsPerPage: 50
+                showSetup: false
+                showSorting: false
+                showFilter: false
+                showSearch: false
+                showPagination: true
+            showCheckboxes: false
+            showSetup: false
+            showSorting: false
+            showFilter: false
+            showSearch: false
+            showPagination: true
+        manage:
+            showCheckboxes: false
+            enabled: false
+            showSetup: false
+            showSorting: false
+            showFilter: false
+            showSearch: false
+            showPagination: true 

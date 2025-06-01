@@ -1,0 +1,12 @@
+list: $/doctor/appointments/models/user/columns.yaml
+modelClass: Doctor\Appointments\Models\User
+title: Users
+noRecordsMessage: 'backend::lang.list.no_records'
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+toolbar:
+    buttons: list_toolbar
+    search:
+        prompt: 'backend::lang.list.search_prompt'
+recordUrl: 'doctor/appointments/users/update/:id'

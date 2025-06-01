@@ -1,7 +1,7 @@
 <?php namespace Doctor\Appointments\Controllers;
 
 use Backend\Classes\Controller;
-use Backend\Classes\NavigationManager;
+use Backend\Facades\BackendMenu;
 
 class ConsultationTypes extends Controller
 {
@@ -10,11 +10,9 @@ class ConsultationTypes extends Controller
     public $listConfig = 'config_list.yaml';
     public $formConfig = 'config_form.yaml';
 
-    public $requiredPermissions = ['doctor.appointments.consultation_types'];
-
     public function __construct()
     {
         parent::__construct();
-        NavigationManager::instance()->setContext('Doctor.Appointments', 'main-menu-item');
+        BackendMenu::setContext('Doctor.Appointments', 'main-menu-item', 'side-menu-consultation-types');
     }
 }

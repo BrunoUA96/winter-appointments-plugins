@@ -1,7 +1,7 @@
 <?php namespace Doctor\Appointments\Controllers;
 
 use Backend\Classes\Controller;
-use Backend\Classes\NavigationManager;
+use Backend\Facades\BackendMenu;
 
 class Appointments extends Controller
 {
@@ -14,6 +14,6 @@ class Appointments extends Controller
     public function __construct()
     {
         parent::__construct();
-        NavigationManager::instance()->setContext('Doctor.Appointments', 'main-menu-item');
+        BackendMenu::setContext('Doctor.Appointments', 'main-menu-item', 'side-menu-appointments');
     }
 }
