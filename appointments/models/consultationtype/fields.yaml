@@ -2,7 +2,7 @@ fields:
     name:
         label: Name
         span: auto
-        type: textarea
+        type: text
     duration:
         label: Duration
         span: auto
