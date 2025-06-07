@@ -53,7 +53,8 @@
     </div>
 
     <div class="form-group">
-        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}" data-callback="onRecaptchaSuccess"></div>
+        <div class="invalid-feedback" data-validate-error-for="g-recaptcha-response"></div>
     </div>
 
     <button type="submit" class="btn btn-primary" data-attach-loading>Записаться</button>
@@ -64,42 +65,23 @@
 <script>
 console.log('Script loaded');
 
+function onRecaptchaSuccess(token) {
+    console.log('reCAPTCHA verified with token:', token);
+}
 
-window.handleError = function(response) {
-    console.log('Error handler called with response:', response);
-    console.log('Response type:', typeof response);
-    console.log('Response keys:', Object.keys(response));
-    alert('Произошла ошибка: ' + response.message);
-};
+function handleSuccess(response) {
+    console.log('Form submitted successfully:', response);
+    // Очищаем форму
+    document.querySelector('form').reset();
+    // Очищаем reCAPTCHA
+    grecaptcha.reset();
+}
 
-// Проверка, что функции определены
-console.log('handleSuccess defined:', typeof window.handleSuccess === 'function');
-console.log('handleError defined:', typeof window.handleError === 'function');
-
-// Добавляем обработчик отправки формы
-document.querySelector('form').addEventListener('submit', function(e) {
-    console.log('Form submitted');
-    
-    // Проверяем значения полей формы
-    const formData = new FormData(this);
-    console.log('Form fields:');
-    for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-    }
-    
-    // Проверяем, что все обязательные поля заполнены
-    const requiredFields = ['patient_name', 'consultation_type_id', 'appointment_time', 'email', 'phone'];
-    const missingFields = requiredFields.filter(field => !formData.get(field));
-    
-    if (missingFields.length > 0) {
-        console.log('Missing required fields:', missingFields);
-        e.preventDefault();
-        alert('Пожалуйста, заполните все обязательные поля');
-        return;
-    }
-    
-    console.log('All required fields are filled');
-});
+function handleError(response) {
+    console.error('Form submission failed:', response);
+    // Очищаем reCAPTCHA при ошибке
+    grecaptcha.reset();
+}
 
 // Добавляем обработчики изменения полей для отладки
 document.querySelectorAll('input, select, textarea').forEach(field => {

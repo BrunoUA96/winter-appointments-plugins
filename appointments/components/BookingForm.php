@@ -42,13 +42,25 @@ class BookingForm extends ComponentBase
     {
         $this->page['consultationTypes'] = ConsultationType::all()->pluck('name', 'id');
         $this->page['availableTimes'] = $this->getAvailableTimes();
-        $this->page['recaptcha_site_key'] = \Doctor\Appointments\Models\GoogleSettings::get('recaptcha_site_key');
+        
+        // Получаем ключ reCAPTCHA из настроек
+        $settings = \Doctor\Appointments\Models\Settings::instance();
+        $siteKey = $settings->get('recaptcha_site_key');
+        
+        if (empty($siteKey)) {
+            Log::error('reCAPTCHA site key is not set in settings');
+        } else {
+            Log::info('reCAPTCHA site key: ' . $siteKey);
+        }
+        
+        $this->page['recaptcha_site_key'] = $siteKey;
     }
 
     public function onSaveBooking()
     {
         try {
             $data = Input::all();
+            Log::info('Form data: ' . json_encode($data));
             
             // Валидация
             $rules = [
@@ -62,12 +74,14 @@ class BookingForm extends ComponentBase
 
             $validator = Validator::make($data, $rules);
             if ($validator->fails()) {
+                Log::error('Validation failed: ' . json_encode($validator->errors()));
                 throw new ValidationException($validator);
             }
 
             // Проверка reCAPTCHA
             $recaptcha = $this->verifyRecaptcha($data['g-recaptcha-response']);
             if (!$recaptcha) {
+                Log::error('reCAPTCHA verification failed');
                 throw new ValidationException(['g-recaptcha-response' => 'reCAPTCHA verification failed']);
             }
 
@@ -92,37 +106,68 @@ class BookingForm extends ComponentBase
                 return redirect($redirect);
             }
         } catch (ValidationException $e) {
+            Log::error('Validation exception: ' . json_encode($e->getErrors()));
             throw $e;
         } catch (\Exception $e) {
+            Log::error('Error in onSaveBooking: ' . $e->getMessage());
             Flash::error('Ошибка при создании записи: ' . $e->getMessage());
         }
     }
 
     protected function verifyRecaptcha($response)
     {
-        $settings = \Doctor\Appointments\Models\Settings::instance();
-        $secret = $settings->recaptcha_secret_key;
-        
-        $url = 'https://www.google.com/recaptcha/api/siteverify';
-        $data = [
-            'secret' => $secret,
-            'response' => $response,
-            'remoteip' => $_SERVER['REMOTE_ADDR']
-        ];
+        try {
+            $settings = \Doctor\Appointments\Models\Settings::instance();
+            $secret = $settings->get('recaptcha_secret_key');
+            
+            if (empty($secret)) {
+                Log::error('reCAPTCHA secret key is not set');
+                return false;
+            }
 
-        $options = [
-            'http' => [
-                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method' => 'POST',
-                'content' => http_build_query($data)
-            ]
-        ];
+            Log::info('Verifying reCAPTCHA with secret: ' . $secret);
+            
+            $url = 'https://www.google.com/recaptcha/api/siteverify';
+            $data = [
+                'secret' => $secret,
+                'response' => $response,
+                'remoteip' => $_SERVER['REMOTE_ADDR']
+            ];
 
-        $context = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
-        $result = json_decode($result);
+            $options = [
+                'http' => [
+                    'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method' => 'POST',
+                    'content' => http_build_query($data)
+                ]
+            ];
 
-        return $result->success;
+            $context = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            
+            if ($result === false) {
+                Log::error('Failed to verify reCAPTCHA: Could not connect to Google');
+                return false;
+            }
+
+            $result = json_decode($result);
+            
+            if (!$result) {
+                Log::error('Failed to verify reCAPTCHA: Invalid response from Google');
+                return false;
+            }
+
+            if (!$result->success) {
+                Log::error('reCAPTCHA verification failed: ' . json_encode($result->{'error-codes'}));
+                return false;
+            }
+
+            Log::info('reCAPTCHA verification successful');
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error verifying reCAPTCHA: ' . $e->getMessage());
+            return false;
+        }
     }
 
     protected function checkGoogleAuth()
