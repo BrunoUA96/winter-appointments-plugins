@@ -15,6 +15,7 @@ use Doctor\Appointments\Models\GoogleSettings;
 use Doctor\Appointments\Services\GoogleCalendarService;
 use Winter\Storm\Support\Facades\Input;
 use Winter\Storm\Exception\ValidationException;
+use Illuminate\Database\QueryException;
 
 class BookingForm extends ComponentBase
 {
@@ -85,9 +86,34 @@ class BookingForm extends ComponentBase
                 throw new ValidationException(['g-recaptcha-response' => 'reCAPTCHA verification failed']);
             }
 
+            // Ищем пользователя с точно такими же email и телефоном
+            $user = User::where('email', $data['email'])
+                       ->where('phone', $data['phone'])
+                       ->first();
+
+            if ($user) {
+                // Если нашли пользователя с точно такими же данными, обновляем только имя если нужно
+                Log::info('Found existing user with matching email and phone: ' . $user->id);
+                
+                if ($user->name !== $data['patient_name']) {
+                    $user->name = $data['patient_name'];
+                    $user->save();
+                    Log::info('Updated user name');
+                }
+            } else {
+                // Если не нашли пользователя с такими же данными, создаем нового
+                Log::info('Creating new user with different contact details');
+                $user = new User();
+                $user->name = $data['patient_name'];
+                $user->email = $data['email'];
+                $user->phone = $data['phone'];
+                $user->save();
+            }
+
             // Создание записи
             $appointment = new Appointment();
             $appointment->fill($data);
+            $appointment->user_id = $user->id;
             $appointment->save();
 
             // Создание события в Google Calendar
@@ -108,6 +134,13 @@ class BookingForm extends ComponentBase
         } catch (ValidationException $e) {
             Log::error('Validation exception: ' . json_encode($e->getErrors()));
             throw $e;
+        } catch (QueryException $e) {
+            Log::error('Database error: ' . $e->getMessage());
+            if (str_contains($e->getMessage(), 'doctor_appointments_users_email_unique')) {
+                Flash::error('Пожалуйста, проверьте правильность email и телефона. Возможно, вы используете email или телефон, которые уже зарегистрированы в системе.');
+            } else {
+                Flash::error('Произошла ошибка при создании записи. Пожалуйста, попробуйте еще раз.');
+            }
         } catch (\Exception $e) {
             Log::error('Error in onSaveBooking: ' . $e->getMessage());
             Flash::error('Ошибка при создании записи: ' . $e->getMessage());
