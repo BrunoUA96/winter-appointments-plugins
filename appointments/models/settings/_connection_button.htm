@@ -1,0 +1,20 @@
+<?php
+use Backend\Facades\Backend;
+use Illuminate\Support\Facades\Request;
+
+$calendarService = new \Doctor\Appointments\Services\GoogleCalendarService();
+$isConnected = $calendarService->isAuthenticated();
+?>
+
+<div class="form-group">
+    <?php if ($isConnected): ?>
+        <div class="alert alert-success">
+            <i class="icon-check"></i> Google Calendar подключен
+        </div>
+    <?php else: ?>
+        <a href="<?= $calendarService->getAuthUrl() ?>" class="btn btn-primary">
+            <i class="icon-refresh"></i> Подключить Google Calendar
+        </a>
+    <?php endif ?>
+</div> 
+

@@ -33,6 +33,11 @@
     </div>
 
     <div class="form-group">
+        <label for="appointment_date">Дата приема</label>
+        <input type="date" class="form-control" id="appointment_date" name="appointment_date" min="{{ 'now'|date('Y-m-d') }}" onchange="updateAvailableTimes()" required>
+    </div>
+
+    <div class="form-group">
         <label for="appointment_time">Время приема</label>
         <select class="form-control" id="appointment_time" name="appointment_time" required>
             <option value="">Выберите время</option>
@@ -59,28 +64,6 @@
 <script>
 console.log('Script loaded');
 
-// Глобальные функции для обработки AJAX-запросов
-window.handleSuccess = function(response) {
-    console.log('Success handler called with response:', response);
-    console.log('Response type:', typeof response);
-    console.log('Response keys:', Object.keys(response));
-    
-    // Проверяем наличие URL для перенаправления
-    if (response.redirect) {
-        console.log('Redirecting to:', response.redirect);
-        // Добавляем небольшую задержку перед перенаправлением
-        setTimeout(function() {
-            window.location.href = response.redirect;
-        }, 100);
-        return;
-    }
-    
-    // Если нет перенаправления, обновляем форму
-    console.log('No redirect URL found, updating form');
-    if (response['@default']) {
-        document.querySelector('form').outerHTML = response['@default'];
-    }
-};
 
 window.handleError = function(response) {
     console.log('Error handler called with response:', response);

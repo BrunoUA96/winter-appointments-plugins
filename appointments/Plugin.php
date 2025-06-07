@@ -5,14 +5,26 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Winter\Storm\Support\Facades\Flash;
 use Backend\Facades\Backend;
+use Doctor\Appointments\Services\GoogleCalendarService;
+use Illuminate\Support\Facades\Event;
 
 class Plugin extends PluginBase
 {
+    public function pluginDetails()
+    {
+        return [
+            'name'        => 'Doctor Appointments',
+            'description' => 'Plugin for managing doctor appointments',
+            'author'      => 'Doctor',
+            'icon'        => 'icon-calendar'
+        ];
+    }
+
     public function registerComponents()
     {
         return [
             'Doctor\Appointments\Components\BookingForm' => 'BookingForm',
-
+            'Doctor\Appointments\Components\AppointmentsList' => 'appointmentsList'
         ];
     }
 
@@ -30,7 +42,7 @@ class Plugin extends PluginBase
                 }
 
                 $calendarService = new \Doctor\Appointments\Services\GoogleCalendarService();
-                $calendarService->handleAuthCode($code);
+                $calendarService->handleAuthCallback($code);
 
                 // Показываем сообщение об успешной авторизации
                 Flash::success('Авторизация Google успешно выполнена. Запись добавлена в календарь доктора.');
@@ -48,20 +60,57 @@ class Plugin extends PluginBase
             session()->forget('google_access_token');
             return 'Session cleared';
         });
+
+        // Регистрируем AJAX-обработчик для Google Auth
+        Event::listen('backend.ajax.beforeRun', function ($handler) {
+            if ($handler->getAjaxHandler() === 'onGoogleAuth') {
+                try {
+                    $calendarService = new GoogleCalendarService();
+                    $authUrl = $calendarService->getAuthUrl();
+                    
+                    return redirect($authUrl);
+                } catch (\Exception $e) {
+                    Flash::error('Error: ' . $e->getMessage());
+                    return redirect()->refresh();
+                }
+            }
+        });
+
+        // Обработка callback от Google
+        Event::listen('cms.page.beforeDisplay', function ($controller, $url, $page) {
+            if (strpos($url, 'google/auth/callback') !== false) {
+                Log::info('Processing Google callback');
+                Log::info('Request parameters: ' . json_encode($_GET));
+                
+                try {
+                    $calendarService = new GoogleCalendarService();
+                    $code = input('code');
+                    
+                    if ($code) {
+                        $calendarService->handleAuthCallback($code);
+                        Flash::success('Google Calendar successfully connected');
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error: ' . $e->getMessage());
+                    Flash::error('Error connecting to Google Calendar: ' . $e->getMessage());
+                }
+                
+                return redirect(Backend::url('doctor/appointments/settings'));
+            }
+        });
     }
 
     public function registerSettings()
     {
         return [
             'settings' => [
-                'label'       => 'Google Settings',
-                'description' => 'Manage Google Calendar integration settings',
-                'category'    => 'Appointments',
+                'label'       => 'Настройки',
+                'description' => 'Настройки плагина',
+                'category'    => 'Doctor Appointments',
                 'icon'        => 'icon-cog',
-                'class'       => 'Doctor\Appointments\Models\GoogleSettings',
+                'class'       => 'Doctor\Appointments\Models\Settings',
                 'order'       => 500,
-                'keywords'    => 'google calendar settings',
-                'permissions' => ['doctor.appointments.access_settings']
+                'keywords'    => 'doctor appointments settings'
             ]
         ];
     }

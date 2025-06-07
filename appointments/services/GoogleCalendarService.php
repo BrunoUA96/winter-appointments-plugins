@@ -4,6 +4,7 @@ use Google\Client;
 use Google\Service\Calendar;
 use Google\Service\Calendar\Event;
 use Illuminate\Support\Facades\Log;
+use Backend\Models\User;
 
 class GoogleCalendarService
 {
@@ -21,22 +22,38 @@ class GoogleCalendarService
         try {
             $this->client = new Client();
             $this->client->setApplicationName('Winter CMS Doctor Booking');
-            $this->client->setScopes([Calendar::CALENDAR_EVENTS]);
+            $this->client->setScopes([
+                Calendar::CALENDAR_EVENTS,
+                Calendar::CALENDAR
+            ]);
             
-            // Используем сервисный аккаунт
-            $credentialsPath = storage_path('app/google/service-account.json');
-            Log::info('Loading credentials from: ' . $credentialsPath);
+            // Используем OAuth credentials
+            $credentialsPath = storage_path('app/google/credentials.json');
+            Log::info('Loading OAuth credentials from: ' . $credentialsPath);
             
             if (!file_exists($credentialsPath)) {
-                throw new \Exception('Credentials file does not exist at: ' . $credentialsPath);
+                throw new \Exception('OAuth credentials file does not exist at: ' . $credentialsPath);
             }
             
-            $credentials = json_decode(file_get_contents($credentialsPath), true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Failed to parse credentials JSON: ' . json_last_error_msg());
+            $this->client->setAuthConfig($credentialsPath);
+            $this->client->setAccessType('offline');
+            $this->client->setPrompt('consent');
+            
+            // Загружаем сохраненный токен
+            $tokenPath = storage_path('app/google/token.json');
+            if (file_exists($tokenPath)) {
+                $accessToken = json_decode(file_get_contents($tokenPath), true);
+                $this->client->setAccessToken($accessToken);
+                
+                // Если токен истек, обновляем его
+                if ($this->client->isAccessTokenExpired()) {
+                    if ($this->client->getRefreshToken()) {
+                        $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
+                        file_put_contents($tokenPath, json_encode($this->client->getAccessToken()));
+                    }
+                }
             }
             
-            $this->client->setAuthConfig($credentials);
             Log::info('Google client initialized successfully');
         } catch (\Exception $e) {
             Log::error('Error initializing Google client: ' . $e->getMessage());
@@ -44,35 +61,43 @@ class GoogleCalendarService
         }
     }
 
-    public function getAccessToken()
+    public function getAuthUrl()
     {
+        return $this->client->createAuthUrl();
+    }
+
+    public function handleAuthCallback($code)
+    {
+        Log::info('handleAuthCallback', ['code' => $code]);
         try {
-            return $this->client->fetchAccessTokenWithAssertion();
+            $token = $this->client->fetchAccessTokenWithAuthCode($code);
+            file_put_contents(storage_path('app/google/token.json'), json_encode($token));
+            return true;
         } catch (\Exception $e) {
-            Log::error('Error getting access token: ' . $e->getMessage());
+            Log::error('Error handling auth callback: ' . $e->getMessage());
             throw $e;
         }
+    }
+
+    public function isAuthenticated()
+    {
+        return file_exists(storage_path('app/google/token.json'));
     }
 
     public function createEvent($appointment)
     {
         try {
-            // Получаем токен
-            $token = $this->getAccessToken();
-            if (!$token) {
-                throw new \Exception('Failed to get access token');
+            if (!$this->isAuthenticated()) {
+                throw new \Exception('Google Calendar not authenticated');
             }
 
             $service = new Calendar($this->client);
-            // Используем ID календаря из настроек
             $calendarId = $this->settings->google_calendar_id;
 
-            // Используем существующий объект DateTime или создаем новый
             $startDateTime = $appointment->appointment_time instanceof \DateTime 
                 ? $appointment->appointment_time 
                 : new \DateTime($appointment->appointment_time);
             
-            // Создаем новый объект DateTime для endDateTime
             $endDateTime = new \DateTime($startDateTime->format('Y-m-d H:i:s'));
             $endDateTime->modify("+{$appointment->consultation_type->duration} minutes");
 
@@ -87,22 +112,27 @@ class GoogleCalendarService
                     'dateTime' => $endDateTime->format('c'),
                     'timeZone' => 'UTC',
                 ],
+                'attendees' => [
+                    ['email' => $appointment->email]
+                ],
                 'reminders' => [
                     'useDefault' => false,
                     'overrides' => [
-                        ['method' => 'email', 'minutes' => 24 * 60], // За день до события
-                        ['method' => 'popup', 'minutes' => 30], // За 30 минут до события
+                        ['method' => 'email', 'minutes' => 24 * 60],
+                        ['method' => 'popup', 'minutes' => 30],
                     ],
                 ],
             ]);
 
-            // Если у записи уже есть ID события в Google Calendar, обновляем его
             if ($appointment->google_event_id) {
-                $event = $service->events->update($calendarId, $appointment->google_event_id, $event);
+                $event = $service->events->update($calendarId, $appointment->google_event_id, $event, [
+                    'sendUpdates' => 'all'
+                ]);
                 Log::info("Updated Google Calendar event: {$event->id}");
             } else {
-                // Создаем новое событие
-                $event = $service->events->insert($calendarId, $event);
+                $event = $service->events->insert($calendarId, $event, [
+                    'sendUpdates' => 'all'
+                ]);
                 Log::info("Created new Google Calendar event: {$event->id}");
             }
             
@@ -116,6 +146,10 @@ class GoogleCalendarService
     public function deleteEvent($calendarId, $eventId)
     {
         try {
+            if (!$this->isAuthenticated()) {
+                throw new \Exception('Google Calendar not authenticated');
+            }
+
             $service = new Calendar($this->client);
             $service->events->delete($calendarId, $eventId);
             Log::info("Deleted Google Calendar event: {$eventId}");

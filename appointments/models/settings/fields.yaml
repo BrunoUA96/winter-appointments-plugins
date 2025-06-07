@@ -11,3 +11,9 @@ fields:
         label: 'reCAPTCHA Secret Key'
         type: text
         span: auto
+    google_calendar_connection:
+        label: 'Подключение к Google Calendar'
+        type: partial
+        path: $/doctor/appointments/models/settings/_connection_button.htm
+        span: auto
+        cssClass: 'google-calendar-connection' 
