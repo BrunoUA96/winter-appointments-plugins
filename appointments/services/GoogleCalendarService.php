@@ -47,9 +47,31 @@ class GoogleCalendarService
                 
                 // Если токен истек, обновляем его
                 if ($this->client->isAccessTokenExpired()) {
+                    Log::info('Access token expired, attempting to refresh...');
+                    
                     if ($this->client->getRefreshToken()) {
-                        $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
-                        file_put_contents($tokenPath, json_encode($this->client->getAccessToken()));
+                        try {
+                            $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
+                            $newAccessToken = $this->client->getAccessToken();
+                            
+                            // Проверяем, что обновление прошло успешно
+                            if (isset($newAccessToken['access_token'])) {
+                                file_put_contents($tokenPath, json_encode($newAccessToken));
+                                Log::info('Access token refreshed successfully');
+                            } else {
+                                throw new \Exception('Failed to refresh access token - no new token received');
+                            }
+                        } catch (\Exception $e) {
+                            Log::error('Failed to refresh access token: ' . $e->getMessage());
+                            // Удаляем недействительный токен
+                            unlink($tokenPath);
+                            throw new \Exception('Access token expired and refresh failed. Please re-authenticate with Google.');
+                        }
+                    } else {
+                        Log::error('No refresh token available');
+                        // Удаляем недействительный токен
+                        unlink($tokenPath);
+                        throw new \Exception('No refresh token available. Please re-authenticate with Google.');
                     }
                 }
             }
@@ -94,6 +116,10 @@ class GoogleCalendarService
             $service = new Calendar($this->client);
             $calendarId = $this->settings->google_calendar_id;
 
+            if (!$calendarId) {
+                throw new \Exception('Google Calendar ID not configured');
+            }
+
             $startDateTime = $appointment->appointment_time instanceof \DateTime 
                 ? $appointment->appointment_time 
                 : new \DateTime($appointment->appointment_time);
@@ -137,6 +163,22 @@ class GoogleCalendarService
             }
             
             return $event->id;
+        } catch (\Google\Service\Exception $e) {
+            $error = json_decode($e->getMessage(), true);
+            
+            // Проверяем, связана ли ошибка с аутентификацией
+            if (isset($error['error']) && $error['error'] === 'invalid_grant') {
+                Log::error('Google Calendar authentication error: ' . $e->getMessage());
+                // Удаляем недействительный токен
+                $tokenPath = storage_path('app/google/token.json');
+                if (file_exists($tokenPath)) {
+                    unlink($tokenPath);
+                }
+                throw new \Exception('Google Calendar authentication expired. Please re-authenticate.');
+            }
+            
+            Log::error('Google Calendar API error: ' . $e->getMessage());
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error creating/updating calendar event: ' . $e->getMessage());
             throw $e;

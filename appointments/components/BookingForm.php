@@ -122,8 +122,11 @@ class BookingForm extends ComponentBase
                 $eventId = $calendarService->createEvent($appointment);
                 $appointment->google_event_id = $eventId;
                 $appointment->save();
+                Log::info('Google Calendar event created successfully');
             } catch (\Exception $e) {
                 Log::error('Error creating Google Calendar event: ' . $e->getMessage());
+                // Не прерываем выполнение при ошибке Google Calendar
+                // Запись все равно создается в базе данных
             }
 
             Flash::success('Запись успешно создана');
@@ -143,7 +146,12 @@ class BookingForm extends ComponentBase
             }
         } catch (\Exception $e) {
             Log::error('Error in onSaveBooking: ' . $e->getMessage());
-            Flash::error('Ошибка при создании записи: ' . $e->getMessage());
+            // Проверяем, не связана ли ошибка с Google Calendar
+            if (str_contains($e->getMessage(), 'invalid_grant') || str_contains($e->getMessage(), 'Google Calendar')) {
+                Flash::warning('Запись создана, но возникла проблема с Google Calendar. Пожалуйста, обратитесь к администратору.');
+            } else {
+                Flash::error('Ошибка при создании записи: ' . $e->getMessage());
+            }
         }
     }
 

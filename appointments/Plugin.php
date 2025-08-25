@@ -135,5 +135,12 @@ class Plugin extends PluginBase
                 'label' => 'Manage users'
             ]
         ];
+    }
+
+    public function registerConsoleCommands()
+    {
+        return [
+            'Doctor\Appointments\Classes\RefreshGoogleToken'
+        ];
     }     
 }
