@@ -1,8 +1,8 @@
 list: ~/plugins/doctor/appointments/controllers/appointments/config_list.yaml
 columns:
-    id:
-        label: id
-        type: number
+    # id:
+    #     label: id
+    #     type: number
     patient_name:
         label: Patient name
         type: text
@@ -16,10 +16,15 @@ columns:
         relation: consultation_type
         select: name
         searchable: true
-    created_at:
-        label: Created at
-        type: datetime
-    description:
-        label: Description
-        type: text
-        searchable: true
+    status:
+        label: Status
+        type: partial
+        path: $/doctor/appointments/models/appointment/_status_column.php
+        cssClass: 'status-column'
+    # created_at:
+    #     label: Created at
+    #     type: datetime
+    # description:
+    #     label: Description
+    #     type: text
+    #     searchable: true

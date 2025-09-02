@@ -1,4 +1,0 @@
-title: Appointments
-modelClass: Doctor\Appointments\Models\Appointment
-toolbar:
-    buttons: reorder_toolbar

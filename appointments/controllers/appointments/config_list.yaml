@@ -6,6 +6,9 @@ noRecordsMessage: 'backend::lang.list.no_records'
 recordsPerPage: 20
 showSetup: true
 showCheckboxes: true
+showPagination: true
+showPageNumbers: true
+pageLimit: 10
 toolbar:
     buttons: list_toolbar
     search:

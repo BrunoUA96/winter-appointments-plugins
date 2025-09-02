@@ -30,3 +30,6 @@
 1.0.11:
     - 'Add features field to consultation_type'
     - add_features_to_consultation_type.php
+1.0.12:
+    - 'Add status field to appointments'
+    - add_status_to_appointments.php

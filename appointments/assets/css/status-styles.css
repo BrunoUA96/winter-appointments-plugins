@@ -1,0 +1,56 @@
+
+
+.status-badge {
+    width: 100%;
+    display: inline-block;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    text-align: center;
+}
+
+/* Статус: На рассмотрении */
+.status-badge.status-pending {
+    background: linear-gradient(135deg, #ff9500, #ff6b00);
+}
+
+/* Статус: Одобрена */
+.status-badge.status-approved {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+/* Статус: Отменена */
+.status-badge.status-cancelled {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .status-badge {
+        padding: 4px 12px;
+        font-size: 11px;
+        min-width: 100px;
+    }
+}
+
+/* Анимация появления */
+.status-badge {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

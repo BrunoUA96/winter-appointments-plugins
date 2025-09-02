@@ -29,3 +29,8 @@ fields:
         label: Description
         span: auto
         type: textarea
+    status:
+        label: 'Status'
+        span: auto
+        type: dropdown
+        options: getStatusOptions

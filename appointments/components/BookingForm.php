@@ -9,10 +9,7 @@ use Winter\Storm\Support\Facades\Flash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
-use Google\Client;
-use Google\Service\Calendar;
-use Doctor\Appointments\Models\GoogleSettings;
-use Doctor\Appointments\Services\GoogleCalendarService;
+// Google Calendar теперь обрабатывается в модели Appointment
 use Winter\Storm\Support\Facades\Input;
 use Winter\Storm\Exception\ValidationException;
 use Illuminate\Database\QueryException;
@@ -114,22 +111,14 @@ class BookingForm extends ComponentBase
             $appointment = new Appointment();
             $appointment->fill($data);
             $appointment->user_id = $user->id;
+            $appointment->status = 'pending'; // Устанавливаем статус "на рассмотрении"
             $appointment->save();
 
-            // Создание события в Google Calendar
-            try {
-                $calendarService = new GoogleCalendarService();
-                $eventId = $calendarService->createEvent($appointment);
-                $appointment->google_event_id = $eventId;
-                $appointment->save();
-                Log::info('Google Calendar event created successfully');
-            } catch (\Exception $e) {
-                Log::error('Error creating Google Calendar event: ' . $e->getMessage());
-                // Не прерываем выполнение при ошибке Google Calendar
-                // Запись все равно создается в базе данных
-            }
+            // Google Calendar событие будет создано автоматически в модели Appointment
+            // только когда статус записи изменится на "approved"
+            Log::info('Appointment created with pending status');
 
-            Flash::success('Запись успешно создана');
+            Flash::success('Запись успешно создана и отправлена на рассмотрение. Мы свяжемся с вами для подтверждения.');
             
             if ($redirect = $this->property('redirect')) {
                 return redirect($redirect);
@@ -146,12 +135,7 @@ class BookingForm extends ComponentBase
             }
         } catch (\Exception $e) {
             Log::error('Error in onSaveBooking: ' . $e->getMessage());
-            // Проверяем, не связана ли ошибка с Google Calendar
-            if (str_contains($e->getMessage(), 'invalid_grant') || str_contains($e->getMessage(), 'Google Calendar')) {
-                Flash::warning('Запись создана, но возникла проблема с Google Calendar. Пожалуйста, обратитесь к администратору.');
-            } else {
-                Flash::error('Ошибка при создании записи: ' . $e->getMessage());
-            }
+            Flash::error('Ошибка при создании записи: ' . $e->getMessage());
         }
     }
 
@@ -211,52 +195,7 @@ class BookingForm extends ComponentBase
         }
     }
 
-    protected function checkGoogleAuth()
-    {
-        try {
-            Log::info('Starting checkGoogleAuth');
-            
-            $settings = \Doctor\Appointments\Models\GoogleSettings::instance();
-            $clientId = $settings->google_client_id;
-            $clientSecret = $settings->google_client_secret;
-
-            Log::info('Google settings loaded', [
-                'has_client_id' => !empty($clientId),
-                'has_client_secret' => !empty($clientSecret)
-            ]);
-
-            if (empty($clientId) || empty($clientSecret)) {
-                throw new \Exception('Google Client ID or Secret is missing');
-            }
-
-            $client = new Client();
-            $client->setApplicationName('Winter CMS Doctor Booking');
-            $client->setScopes([Calendar::CALENDAR_EVENTS]);
-            $client->setClientId($clientId);
-            $client->setClientSecret($clientSecret);
-            $client->setRedirectUri('http://127.0.0.1:8000/google-callback');
-            $client->setAccessType('offline');
-            $client->setPrompt('select_account consent');
-
-            $accessToken = session('google_access_token');
-            Log::info('Access token status', ['has_token' => !empty($accessToken)]);
-
-            if (!$accessToken) {
-                $authUrl = $client->createAuthUrl();
-                Log::info('Created auth URL', ['url' => $authUrl]);
-                return [
-                    'redirect' => $authUrl
-                ];
-            }
-
-            Log::info('No redirect needed, token exists');
-            return [];
-        } catch (\Exception $e) {
-            Log::error('Google auth check error: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            throw $e;
-        }
-    }
+    // Google Calendar аутентификация теперь обрабатывается в отдельном сервисе
 
     protected function getAvailableTimes()
     {
@@ -274,55 +213,8 @@ class BookingForm extends ComponentBase
         return $times;
     }
 
-    protected function createGoogleCalendarEvent($appointment)
-    {
-        try {
-            $client = $this->getGoogleClient();
-            $service = new Calendar($client);
-
-            // Получаем настройки календаря
-            $calendarId = GoogleSettings::get('calendar_id');
-            if (!$calendarId) {
-                throw new \Exception('Calendar ID не настроен');
-            }
-
-            // Создаем событие
-            $event = new \Google\Service\Calendar\Event([
-                'summary' => 'Прием пациента: ' . $appointment->patient_name,
-                'description' => 'Тип консультации: ' . $appointment->consultationType->name . "\n" .
-                               'Телефон: ' . $appointment->phone . "\n" .
-                               'Email: ' . $appointment->email,
-                'start' => [
-                    'dateTime' => $appointment->appointment_time->format('c'),
-                    'timeZone' => 'Europe/Kiev',
-                ],
-                'end' => [
-                    'dateTime' => $appointment->appointment_time->addMinutes(30)->format('c'),
-                    'timeZone' => 'Europe/Kiev',
-                ],
-                'attendees' => [
-                    ['email' => $appointment->email]
-                ],
-                'reminders' => [
-                    'useDefault' => false,
-                    'overrides' => [
-                        ['method' => 'email', 'minutes' => 24 * 60], // За день
-                        ['method' => 'popup', 'minutes' => 30], // За 30 минут
-                    ],
-                ],
-            ]);
-
-            $event = $service->events->insert($calendarId, $event, [
-                'sendUpdates' => 'all' // Отправлять уведомления всем участникам
-            ]);
-
-            Log::info('Google Calendar event created', ['eventId' => $event->getId()]);
-            return $event->getId();
-        } catch (\Exception $e) {
-            Log::error('Error creating Google Calendar event: ' . $e->getMessage());
-            throw $e;
-        }
-    }
+    // Google Calendar события теперь создаются автоматически в модели Appointment
+    // только когда статус записи изменяется на "approved"
 
     public function onGetConsultationFeatures()
     {
