@@ -39,47 +39,152 @@ class GoogleCalendarService
             $this->client->setAccessType('offline');
             $this->client->setPrompt('consent');
             
-            // Загружаем сохраненный токен
-            $tokenPath = storage_path('app/google/token.json');
-            if (file_exists($tokenPath)) {
-                $accessToken = json_decode(file_get_contents($tokenPath), true);
-                $this->client->setAccessToken($accessToken);
-                
-                // Если токен истек, обновляем его
-                if ($this->client->isAccessTokenExpired()) {
-                    Log::info('Access token expired, attempting to refresh...');
-                    
-                    if ($this->client->getRefreshToken()) {
-                        try {
-                            $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
-                            $newAccessToken = $this->client->getAccessToken();
-                            
-                            // Проверяем, что обновление прошло успешно
-                            if (isset($newAccessToken['access_token'])) {
-                                file_put_contents($tokenPath, json_encode($newAccessToken));
-                                Log::info('Access token refreshed successfully');
-                            } else {
-                                throw new \Exception('Failed to refresh access token - no new token received');
-                            }
-                        } catch (\Exception $e) {
-                            Log::error('Failed to refresh access token: ' . $e->getMessage());
-                            // Удаляем недействительный токен
-                            unlink($tokenPath);
-                            throw new \Exception('Access token expired and refresh failed. Please re-authenticate with Google.');
-                        }
-                    } else {
-                        Log::error('No refresh token available');
-                        // Удаляем недействительный токен
-                        unlink($tokenPath);
-                        throw new \Exception('No refresh token available. Please re-authenticate with Google.');
-                    }
-                }
-            }
+            // Загружаем и проверяем токен
+            $this->loadAndValidateToken();
             
             Log::info('Google client initialized successfully');
         } catch (\Exception $e) {
             Log::error('Error initializing Google client: ' . $e->getMessage());
             throw $e;
+        }
+    }
+
+    /**
+     * Загружает и валидирует токен, автоматически обновляя его при необходимости
+     */
+    protected function loadAndValidateToken()
+    {
+        $tokenPath = storage_path('app/google/token.json');
+        
+        if (!file_exists($tokenPath)) {
+            Log::info('No token file found, authentication required');
+            return;
+        }
+
+        try {
+            $accessToken = json_decode(file_get_contents($tokenPath), true);
+            
+            // Добавляем недостающие поля, если их нет
+            $accessToken = $this->normalizeToken($accessToken);
+            
+            $this->client->setAccessToken($accessToken);
+            
+            // Проверяем, нужно ли обновить токен
+            if ($this->shouldRefreshToken($accessToken)) {
+                Log::info('Token needs refresh, attempting to refresh...');
+                $this->refreshAccessToken();
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('Error loading token: ' . $e->getMessage());
+            $this->removeInvalidToken();
+        }
+    }
+
+    /**
+     * Нормализует токен, добавляя недостающие поля
+     */
+    protected function normalizeToken($token)
+    {
+        // Если нет поля expires_at, вычисляем его из expires_in
+        if (!isset($token['expires_at']) && isset($token['expires_in'])) {
+            $token['expires_at'] = time() + $token['expires_in'];
+        }
+        
+        // Если нет поля created, добавляем текущее время
+        if (!isset($token['created'])) {
+            $token['created'] = time();
+        }
+        
+        return $token;
+    }
+
+    /**
+     * Проверяет, нужно ли обновить токен
+     */
+    protected function shouldRefreshToken($token)
+    {
+        // Если нет поля expires_at, считаем токен истекшим
+        if (!isset($token['expires_at'])) {
+            Log::warning('Token missing expires_at field, considering expired');
+            return true;
+        }
+        
+        // Проверяем, истек ли токен (с запасом в 5 минут)
+        $expiresAt = $token['expires_at'];
+        $currentTime = time();
+        $bufferTime = 300; // 5 минут
+        
+        if ($currentTime >= ($expiresAt - $bufferTime)) {
+            Log::info("Token expires at " . date('Y-m-d H:i:s', $expiresAt) . ", current time: " . date('Y-m-d H:i:s', $currentTime));
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Обновляет access token используя refresh token
+     */
+    protected function refreshAccessToken()
+    {
+        try {
+            Log::info('Attempting to refresh access token...');
+            
+            if (!$this->client->getRefreshToken()) {
+                throw new \Exception('No refresh token available');
+            }
+            
+            $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
+            $newAccessToken = $this->client->getAccessToken();
+            
+            if (isset($newAccessToken['access_token'])) {
+                // Нормализуем новый токен
+                $newAccessToken = $this->normalizeToken($newAccessToken);
+                
+                // Сохраняем обновленный токен
+                $tokenPath = storage_path('app/google/token.json');
+                file_put_contents($tokenPath, json_encode($newAccessToken));
+                
+                Log::info('Access token refreshed successfully');
+                Log::info('New token expires at: ' . (isset($newAccessToken['expires_at']) ? date('Y-m-d H:i:s', $newAccessToken['expires_at']) : 'unknown'));
+                
+                return true;
+            } else {
+                throw new \Exception('No new access token received after refresh');
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to refresh access token: ' . $e->getMessage());
+            $this->removeInvalidToken();
+            throw new \Exception('Access token expired and refresh failed. Please re-authenticate with Google.');
+        }
+    }
+
+    /**
+     * Удаляет недействительный токен
+     */
+    protected function removeInvalidToken()
+    {
+        $tokenPath = storage_path('app/google/token.json');
+        if (file_exists($tokenPath)) {
+            unlink($tokenPath);
+            Log::info('Invalid token removed');
+        }
+    }
+
+    /**
+     * Проверяет и обновляет токен перед API вызовом
+     */
+    protected function ensureValidToken()
+    {
+        $tokenPath = storage_path('app/google/token.json');
+        if (file_exists($tokenPath)) {
+            $token = json_decode(file_get_contents($tokenPath), true);
+            if ($this->shouldRefreshToken($token)) {
+                Log::info('Token needs refresh before API call');
+                $this->refreshAccessToken();
+            }
         }
     }
 
@@ -93,7 +198,15 @@ class GoogleCalendarService
         Log::info('handleAuthCallback', ['code' => $code]);
         try {
             $token = $this->client->fetchAccessTokenWithAuthCode($code);
+            
+            // Нормализуем токен перед сохранением
+            $token = $this->normalizeToken($token);
+            
             file_put_contents(storage_path('app/google/token.json'), json_encode($token));
+            
+            Log::info('Authentication completed successfully');
+            Log::info('Token expires at: ' . (isset($token['expires_at']) ? date('Y-m-d H:i:s', $token['expires_at']) : 'unknown'));
+            
             return true;
         } catch (\Exception $e) {
             Log::error('Error handling auth callback: ' . $e->getMessage());
@@ -109,6 +222,9 @@ class GoogleCalendarService
     public function createEvent($appointment)
     {
         try {
+            // Убеждаемся, что токен действителен перед API вызовом
+            $this->ensureValidToken();
+            
             if (!$this->isAuthenticated()) {
                 throw new \Exception('Google Calendar not authenticated');
             }

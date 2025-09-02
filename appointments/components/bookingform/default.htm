@@ -179,24 +179,12 @@
 
             <div class="info-card">
                 <div class="info-header">
-                    <h3>✅ O que está incluído</h3>
+                    <h3>✅ Consulta inclui</h3>
                 </div>
-                <div class="info-content">
+                <div class="info-content" id="consultation-features">
                     <div class="feature-item">
                         <span class="feature-icon">✓</span>
-                        <span>Consulta inicial</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Exame e diagnóstico</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Recomendações de tratamento</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Exame de sangue</span>
+                        <span>Selecione um tipo de consulta para ver o que está incluído</span>
                     </div>
                 </div>
             </div>
@@ -221,13 +209,14 @@
 
 .booking-header h1 {
     font-size: 2.5rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #2c3e50;
     margin-bottom: 10px;
 }
 
 .booking-header p {
     font-size: 1.1rem;
+    font-weight: 300;
     color: #6c757d;
     margin: 0;
 }
@@ -250,8 +239,8 @@
 }
 
 .form-section h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 500;
     color: #2c3e50;
     margin-bottom: 20px;
     padding-bottom: 10px;
@@ -270,17 +259,17 @@
 
 .form-group label {
     display: block;
-    font-weight: 500;
+    font-weight: 400;
     color: #495057;
     margin-bottom: 8px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .form-control {
     width: 100%;
-    padding: 12px 16px;
+    padding: 9px 16px;
     border: 2px solid #e9ecef;
-    font-size: 1rem;
+    font-size: 0.8rem;
     transition: all 0.3s ease;
     background: #fff;
     border-radius: 0;
@@ -357,7 +346,7 @@ textarea.form-control {
 
 .info-header h3 {
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 400;
     color: #2c3e50;
     margin-bottom: 20px;
     margin-top: 0;
@@ -368,7 +357,11 @@ textarea.form-control {
 .info-content {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 4px;
+}
+
+.info-content .feature-item span {
+    font-weight: 300;
 }
 
 .info-item {
@@ -401,7 +394,7 @@ textarea.form-control {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 0.95rem;
+    font-size: 0.8rem;
     color: #495057;
 }
 
@@ -902,4 +895,58 @@ document.querySelectorAll('input, select, textarea').forEach(field => {
         console.log(`Field ${this.name} changed to:`, this.value);
     });
 });
+ 
+// Обработчик изменения типа консультации
+document.getElementById('consultation_type_id').addEventListener('change', function() {
+    updateConsultationFeatures(this.value);
+});
+
+// Функция для обновления features консультации
+function updateConsultationFeatures(consultationTypeId) {
+    const featuresContainer = document.getElementById('consultation-features');
+    
+    if (!consultationTypeId) {
+        featuresContainer.innerHTML = `
+            <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Selecione um tipo de consulta para ver o que está incluído</span>
+            </div>
+        `;
+        return;
+    }
+    
+    // Получаем features через AJAX
+    $.request('onGetConsultationFeatures', {
+        data: { consultation_type_id: consultationTypeId },
+        success: function(response) {
+            if (response.features && response.features.length > 0) {
+                let featuresHtml = '';
+                response.features.forEach(feature => {
+                    featuresHtml += `
+                        <div class="feature-item">
+                            <span class="feature-icon">✓</span>
+                            <span>${feature}</span>
+                        </div>
+                    `;
+                });
+                featuresContainer.innerHTML = featuresHtml;
+            } else {
+                featuresContainer.innerHTML = `
+                    <div class="feature-item">
+                        <span class="feature-icon">ℹ️</span>
+                        <span>Nenhuma informação disponível para este tipo de consulta</span>
+                    </div>
+                `;
+            }
+        },
+        error: function() {
+            featuresContainer.innerHTML = `
+                <div class="feature-item">
+                    <span class="feature-icon">⚠️</span>
+                    <span>Erro ao carregar informações da consulta</span>
+                </div>
+            `;
+        }
+    });
+}
 </script>

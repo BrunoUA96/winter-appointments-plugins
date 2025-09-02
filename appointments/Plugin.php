@@ -24,7 +24,6 @@ class Plugin extends PluginBase
     {
         return [
             'Doctor\Appointments\Components\BookingForm' => 'BookingForm',
-            'Doctor\Appointments\Components\AppointmentsList' => 'appointmentsList'
         ];
     }
 

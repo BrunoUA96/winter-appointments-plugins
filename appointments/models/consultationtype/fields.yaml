@@ -7,3 +7,14 @@ fields:
         label: Duration
         span: auto
         type: number
+    features:
+        label: 'Что входит в консультацию'
+        span: full
+        type: repeater
+        form:
+            fields:
+                feature:
+                    label: 'Элемент'
+                    type: text
+                    required: true
+        comment: 'Добавьте список того, что входит в данный тип консультации'
