@@ -323,4 +323,41 @@ class BookingForm extends ComponentBase
             throw $e;
         }
     }
+
+    public function onGetConsultationFeatures()
+    {
+        // Добавляем логирование для отладки
+        Log::info('onGetConsultationFeatures called', [
+            'input' => Input::all(),
+            'consultation_type_id' => Input::get('consultation_type_id')
+        ]);
+        
+        $consultationTypeId = Input::get('consultation_type_id');
+        
+        if (!$consultationTypeId) {
+            Log::warning('No consultation_type_id provided');
+            return response()->json(['error' => 'Consultation type ID is required']);
+        }
+        
+        $consultationType = ConsultationType::find($consultationTypeId);
+        
+        if (!$consultationType) {
+            Log::warning('Consultation type not found', ['id' => $consultationTypeId]);
+            return response()->json(['error' => 'Consultation type not found']);
+        }
+        
+        $features = $consultationType->features_array;
+        
+        Log::info('Features retrieved successfully', [
+            'consultation_type_id' => $consultationTypeId,
+            'features_count' => count($features),
+            'features' => $features
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'features' => $features,
+            'consultation_name' => $consultationType->name
+        ]);
+    }
 }

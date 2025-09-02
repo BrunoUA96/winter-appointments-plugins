@@ -27,3 +27,6 @@
 1.0.10:
     - 'Add user_id to doctor_appointments_appointments'
     - add_user_id_to_appointments.php
+1.0.11:
+    - 'Add features field to consultation_type'
+    - add_features_to_consultation_type.php
