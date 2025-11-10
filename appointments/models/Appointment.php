@@ -63,9 +63,9 @@ class Appointment extends Model
     public function getStatusOptions()
     {
         return [
-            self::STATUS_PENDING => 'На рассмотрении',
-            self::STATUS_APPROVED => 'Одобрена',
-            self::STATUS_CANCELLED => 'Отменена'
+            self::STATUS_PENDING => 'Pendente',
+            self::STATUS_APPROVED => 'Aprovado',
+            self::STATUS_CANCELLED => 'Cancelado'
         ];
     }
 
@@ -167,15 +167,12 @@ class Appointment extends Model
                     Log::error('Failed to create Google Calendar event: ' . $e->getMessage());
                 }
             } elseif ($this->isCancelled() && $this->google_event_id) {
-                // Удаляем событие из Google Calendar для отмененных записей
+                // Отменяем событие в Google Calendar для отмененных записей
                 try {
-                    $calendarService->deleteEvent($this->google_event_id);
-                    // Очищаем ID события
-                    $this->update(['google_event_id' => null]);
-                    $this->google_event_id = null;
-                    Log::info('Google Calendar event deleted for cancelled appointment');
+                    $calendarService->cancelEvent($this);
+                    Log::info('Google Calendar event cancelled for appointment');
                 } catch (\Exception $e) {
-                    Log::warning('Failed to delete Google Calendar event: ' . $e->getMessage());
+                    Log::warning('Failed to cancel Google Calendar event: ' . $e->getMessage());
                 }
             }
             

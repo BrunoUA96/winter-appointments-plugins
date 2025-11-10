@@ -244,7 +244,7 @@ class GoogleCalendarService
             $endDateTime->modify("+{$appointment->consultation_type->duration} minutes");
 
             $event = new Event([
-                'summary' => "Запись: {$appointment->patient_name} ({$appointment->consultation_type->name})",
+                'summary' => "Consulta: {$appointment->patient_name} ({$appointment->consultation_type->name})",
                 'description' => $appointment->description,
                 'start' => [
                     'dateTime' => $startDateTime->format('c'),
@@ -297,6 +297,61 @@ class GoogleCalendarService
             throw $e;
         } catch (\Exception $e) {
             Log::error('Error creating/updating calendar event: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function cancelEvent($appointment)
+    {
+        try {
+            // Убеждаемся, что токен действителен перед API вызовом
+            $this->ensureValidToken();
+            
+            if (!$this->isAuthenticated()) {
+                throw new \Exception('Google Calendar not authenticated');
+            }
+
+            if (!$appointment->google_event_id) {
+                Log::info('No Google Calendar event ID found, nothing to cancel');
+                return true;
+            }
+
+            $service = new Calendar($this->client);
+            $calendarId = $this->settings->google_calendar_id;
+
+            if (!$calendarId) {
+                throw new \Exception('Google Calendar ID not configured');
+            }
+
+            // Получаем существующее событие
+            $event = $service->events->get($calendarId, $appointment->google_event_id);
+            
+            // Проверяем, существует ли событие
+            if (!$event) {
+                Log::warning("Google Calendar event {$appointment->google_event_id} not found");
+                return true;
+            }
+
+            // Устанавливаем статус события как "cancelled"
+            $event->setStatus('cancelled');
+            
+            // Обновляем событие в календаре
+            $updatedEvent = $service->events->update($calendarId, $appointment->google_event_id, $event, [
+                'sendUpdates' => 'all'
+            ]);
+            
+            Log::info("Cancelled Google Calendar event: {$appointment->google_event_id}");
+            return true;
+        } catch (\Google\Service\Exception $e) {
+            // Если событие не найдено (404), это нормально - возможно оно уже было удалено
+            if ($e->getCode() == 404) {
+                Log::info("Google Calendar event {$appointment->google_event_id} not found, may have been already deleted");
+                return true;
+            }
+            Log::error('Error cancelling calendar event: ' . $e->getMessage());
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Error cancelling calendar event: ' . $e->getMessage());
             throw $e;
         }
     }

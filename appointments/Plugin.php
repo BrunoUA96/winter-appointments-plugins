@@ -103,10 +103,10 @@ class Plugin extends PluginBase
     {
         return [
             'settings' => [
-                'label'       => 'Настройки',
-                'description' => 'Настройки плагина',
+                'label'       => 'Google Settings',
+                'description' => 'Google settings for the plugin',
                 'category'    => 'Doctor Appointments',
-                'icon'        => 'icon-cog',
+                'icon'        => 'icon-calendar',
                 'class'       => 'Doctor\Appointments\Models\Settings',
                 'order'       => 500,
                 'keywords'    => 'doctor appointments settings'

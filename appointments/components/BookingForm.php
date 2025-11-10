@@ -118,7 +118,7 @@ class BookingForm extends ComponentBase
             // только когда статус записи изменится на "approved"
             Log::info('Appointment created with pending status');
 
-            Flash::success('Запись успешно создана и отправлена на рассмотрение. Мы свяжемся с вами для подтверждения.');
+            Flash::success('Consulta agendada com sucesso. Em breve você receberá um e-mail de confirmação.');
             
             if ($redirect = $this->property('redirect')) {
                 return redirect($redirect);
@@ -129,13 +129,13 @@ class BookingForm extends ComponentBase
         } catch (QueryException $e) {
             Log::error('Database error: ' . $e->getMessage());
             if (str_contains($e->getMessage(), 'doctor_appointments_users_email_unique')) {
-                Flash::error('Пожалуйста, проверьте правильность email и телефона. Возможно, вы используете email или телефон, которые уже зарегистрированы в системе.');
+                Flash::error('Por favor, verifique se o email e o telefone estão corretos. Talvez você esteja usando um email ou telefone que já está registrado no sistema.');
             } else {
-                Flash::error('Произошла ошибка при создании записи. Пожалуйста, попробуйте еще раз.');
+                Flash::error('Ocorreu um erro ao criar a consulta. Por favor, tente novamente.');
             }
         } catch (\Exception $e) {
             Log::error('Error in onSaveBooking: ' . $e->getMessage());
-            Flash::error('Ошибка при создании записи: ' . $e->getMessage());
+            Flash::error('Erro ao criar a consulta: ' . $e->getMessage());
         }
     }
 

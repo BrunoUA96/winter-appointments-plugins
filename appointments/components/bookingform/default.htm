@@ -90,13 +90,13 @@
 <div id="confirmationModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>📋 Confirmação de agendamento</h2>
+            <h2>Confirmação de agendamento</h2>
             <span class="close" onclick="closeConfirmationModal()">&times;</span>
         </div>
         <div class="modal-body">
             <div class="confirmation-preview">
                 <div class="preview-section">
-                    <h3>👤 Dados pessoais</h3>
+                    <h3>Dados pessoais</h3>
                     <div class="preview-item">
                         <span class="preview-label">Nome:</span>
                         <span class="preview-value" id="preview-name"></span>
@@ -112,7 +112,7 @@
                 </div>
                 
                 <div class="preview-section">
-                    <h3>🏥 Detalhes da consulta</h3>
+                    <h3>Detalhes da consulta</h3>
                     <div class="preview-item">
                         <span class="preview-label">Tipo de consulta:</span>
                         <span class="preview-value" id="preview-consultation"></span>
@@ -133,7 +133,6 @@
             </div>
             
             <div class="confirmation-notice">
-                <div class="notice-icon">ℹ️</div>
                 <div class="notice-text">
                     <strong>Importante:</strong> 
                     Por favor, certifique-se de que todos os dados estão corretos.
@@ -141,12 +140,11 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeConfirmationModal()">
+            {# <button type="button" class="btn btn-secondary" onclick="closeConfirmationModal()">
                 Cancelar
-            </button>
+            </button> #}
            <!-- <button type="button" class="btn btn-pink" onclick="submitForm()"> -->
-           <button type="submit" class="btn btn-primary btn-booking" data-attach-loading>
-                <span class="btn-icon">✅</span>
+           <button type="submit" class="btn btn-pink btn-booking" data-attach-loading>
                 Confirmar agendamento
             </button>
         </div>
@@ -179,12 +177,12 @@
 
             <div class="info-card">
                 <div class="info-header">
-                    <h3>✅ Consulta inclui</h3>
+                    <h3>Informação da consulta</h3>
                 </div>
                 <div class="info-content" id="consultation-features">
                     <div class="feature-item">
                         <span class="feature-icon">✓</span>
-                        <span>Selecione um tipo de consulta para ver o que está incluído</span>
+                        <span>Selecione um tipo de consulta para ver as informações da consulta</span>
                     </div>
                 </div>
             </div>
@@ -427,6 +425,7 @@ textarea.form-control {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: slideIn 0.3s ease;
     overflow: hidden;
+    border-radius: 0px;
 }
 
 .modal-header {
@@ -437,12 +436,14 @@ textarea.form-control {
     justify-content: space-between;
     align-items: center;
     position: relative;
+    border-radius: 0px;
 }
 
 .modal-header h2 {
     margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.65);
 }
 
 .close {
@@ -474,8 +475,8 @@ textarea.form-control {
 }
 
 .preview-section h3 {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 400;
     color: #2c3e50;
     margin-bottom: 15px;
     padding-bottom: 8px;
@@ -486,7 +487,7 @@ textarea.form-control {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 10px 0;
+    padding: 4px 0;
     border-bottom: 1px solid #f8f9fa;
 }
 
@@ -494,16 +495,15 @@ textarea.form-control {
     border-bottom: none;
 }
 
-.preview-label {
-    font-size: 1.2rem;
-    font-weight: 500;
+.preview-label, .preview-value {
+    font-size: 0.9rem;
+    font-weight: 400;
     color: #6c757d;
     min-width: 120px;
     flex-shrink: 0;
 }
 
 .preview-value {
-    color: #2c3e50;
     text-align: right;
     word-break: break-word;
 }
@@ -517,14 +517,9 @@ textarea.form-control {
     gap: 12px;
 }
 
-.notice-icon {
-    font-size: 1.2rem;
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
 .notice-text {
-    font-size: 1.3rem;
+    font-size: 1rem;
+    font-weight: 400;
     color: #1565c0;
     line-height: 1.5;
 }
@@ -551,14 +546,18 @@ textarea.form-control {
 }
 
 .btn-pink {
-    background-color: #ffd3f3;
-    -webkit-box-shadow: 0px 0px 20px 1px #ffd3f3;
+    background-color: #ffd3f3 !important;
+    -webkit-box-shadow: 0px 0px 20px 1px #ffd3f3 !important;
     -moz-box-shadow: 0px 0px 20px 1px #ffd3f3;
-    box-shadow: 0px 0px 20px 1px #ffd3f3;
+    box-shadow: 0px 0px 20px 1px #ffd3f3 !important;
 }
 
 .btn-pink:hover {
     transform: translateY(-2px);
+}
+
+.btn-pink:active {
+    transform: translateY(0);
 }
 
 .btn-secondary {
@@ -708,7 +707,7 @@ function handleSuccess(response) {
     closeConfirmationModal();
     
     // Показываем сообщение об успехе
-    showMessage('Запись успешно создана! Мы свяжемся с вами для подтверждения.', 'success');
+    showMessage('Consulta agendada com sucesso. Em breve você receberá um e-mail de confirmação.', 'success');
     
     // Очищаем форму
     document.querySelector('form').reset();
@@ -723,7 +722,7 @@ function handleError(response) {
     closeConfirmationModal();
     
     // Показываем сообщение об ошибке
-    showMessage('Произошла ошибка при создании записи. Пожалуйста, попробуйте еще раз.', 'error');
+    showMessage('Ocorreu um erro ao criar a consulta. Por favor, tente novamente.', 'error');
     
     // Очищаем reCAPTCHA при ошибке
     grecaptcha.reset();
