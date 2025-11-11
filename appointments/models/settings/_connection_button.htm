@@ -9,11 +9,11 @@ $isConnected = $calendarService->isAuthenticated();
 <div class="form-group">
     <?php if ($isConnected): ?>
         <div class="alert alert-success">
-            <i class="icon-check"></i> Google Calendar подключен
+            <i class="icon-check"></i> Google Calendar Conectado
         </div>
     <?php else: ?>
         <a href="<?= $calendarService->getAuthUrl() ?>" class="btn btn-primary">
-            <i class="icon-refresh"></i> Подключить Google Calendar
+            <i class="icon-refresh"></i> Conectar Google Calendar
         </a>
     <?php endif ?>
 </div> 

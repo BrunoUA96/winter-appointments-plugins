@@ -8,13 +8,13 @@ fields:
         span: auto
         type: number
     features:
-        label: 'Что входит в консультацию'
+        label: 'O que está incluído na consulta'
         span: full
         type: repeater
         form:
             fields:
                 feature:
-                    label: 'Элемент'
+                    label: 'Item'
                     type: text
                     required: true
-        comment: 'Добавьте список того, что входит в данный тип консультации'
+        comment: 'Adicione a lista do que está incluído neste tipo de consulta'
