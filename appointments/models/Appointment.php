@@ -12,6 +12,7 @@ class Appointment extends Model
     const STATUS_PENDING = 'pending';
     const STATUS_APPROVED = 'approved';
     const STATUS_CANCELLED = 'cancelled';
+    const STATUS_CANCELLED_BY_PATIENT = 'cancelled_by_patient';
 
     protected $dates = ["deleted_at"];
     private static $isSyncing = false;
@@ -65,7 +66,8 @@ class Appointment extends Model
         return [
             self::STATUS_PENDING => 'Pendente',
             self::STATUS_APPROVED => 'Aprovado',
-            self::STATUS_CANCELLED => 'Cancelado'
+            self::STATUS_CANCELLED => 'Cancelado',
+            self::STATUS_CANCELLED_BY_PATIENT => 'Cancelado pelo Paciente'
         ];
     }
 
@@ -82,7 +84,15 @@ class Appointment extends Model
      */
     public function isCancelled()
     {
-        return $this->status === self::STATUS_CANCELLED;
+        return $this->status === self::STATUS_CANCELLED || $this->status === self::STATUS_CANCELLED_BY_PATIENT;
+    }
+
+    /**
+     * Проверить, является ли запись отмененной пациентом
+     */
+    public function isCancelledByPatient()
+    {
+        return $this->status === self::STATUS_CANCELLED_BY_PATIENT;
     }
 
     /**
@@ -104,10 +114,49 @@ class Appointment extends Model
             case self::STATUS_APPROVED:
                 return 'success';
             case self::STATUS_CANCELLED:
+            case self::STATUS_CANCELLED_BY_PATIENT:
                 return 'danger';
             default:
                 return 'secondary';
         }
+    }
+
+    /**
+     * Генерировать токен для публичной ссылки
+     */
+    public function generatePublicToken()
+    {
+        // Используем хеш от ID и email для безопасности
+        return md5($this->id . $this->email . config('app.key'));
+    }
+
+    /**
+     * Проверить токен для публичной ссылки
+     */
+    public function verifyPublicToken($token)
+    {
+        return $this->generatePublicToken() === $token;
+    }
+
+    /**
+     * Проверить, можно ли отменить консультацию (еще не прошла)
+     */
+    public function canBeCancelled()
+    {
+        if ($this->isCancelled() || $this->isCancelledByPatient()) {
+            return false;
+        }
+        
+        if (!$this->appointment_time) {
+            return false;
+        }
+        
+        $now = new \DateTime();
+        $appointmentTime = $this->appointment_time instanceof \DateTime 
+            ? $this->appointment_time 
+            : new \DateTime($this->appointment_time);
+        
+        return $appointmentTime > $now;
     }
 
     /**
@@ -208,12 +257,29 @@ class Appointment extends Model
                 }
             }
             
-            // Отправляем email при изменении статуса на cancelled
-            if ($this->isCancelled() && $this->wasChanged('status')) {
+            // Отправляем email при изменении статуса на cancelled (администратором)
+            if ($this->status === self::STATUS_CANCELLED && $this->wasChanged('status')) {
                 try {
                     $notificationService->sendAppointmentCancelled($this);
                 } catch (\Exception $e) {
                     Log::error('Failed to send appointment cancelled email: ' . $e->getMessage());
+                }
+            }
+            
+            // Отправляем email при отмене пациентом (cancelled_by_patient)
+            if ($this->isCancelledByPatient() && $this->wasChanged('status')) {
+                try {
+                    // Отправляем email пациенту о подтверждении отмены
+                    $notificationService->sendAppointmentCancelled($this);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send appointment cancelled by patient email: ' . $e->getMessage());
+                }
+                
+                try {
+                    // Отправляем email администратору о том, что пациент отменил консультацию
+                    $notificationService->sendAdminCancellationNotification($this);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send admin notification about patient cancellation: ' . $e->getMessage());
                 }
             }
             

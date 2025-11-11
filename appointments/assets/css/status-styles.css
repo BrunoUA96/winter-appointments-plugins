@@ -25,7 +25,8 @@
 }
 
 /* Статус: Отменена */
-.status-badge.status-cancelled {
+.status-badge.status-cancelled,
+.status-badge.status-cancelled_by_patient {
     background: linear-gradient(135deg, #dc3545, #c82333);
 }
 

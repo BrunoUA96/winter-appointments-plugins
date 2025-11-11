@@ -21,9 +21,9 @@ columns:
         type: partial
         path: $/doctor/appointments/models/appointment/_status_column.php
         cssClass: 'status-column'
-    # created_at:
-    #     label: Created at
-    #     type: datetime
+    created_at:
+        label: Created at
+        type: datetime
     # description:
     #     label: Description
     #     type: text

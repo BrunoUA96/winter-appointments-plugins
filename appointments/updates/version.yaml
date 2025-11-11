@@ -33,3 +33,6 @@
 1.0.12:
     - 'Add status field to appointments'
     - add_status_to_appointments.php
+1.0.13:
+    - 'Add cancelled_by_patient status to appointments'
+    - add_cancelled_by_patient_status.php

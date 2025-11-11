@@ -143,6 +143,52 @@ class NotificationService
     }
 
     /**
+     * Отправить email администратору о том, что пациент отменил консультацию
+     *
+     * @param Appointment $appointment
+     * @return bool
+     */
+    public function sendAdminCancellationNotification(Appointment $appointment)
+    {
+        try {
+            // Получаем email администратора из настроек
+            $settings = Settings::instance();
+            $adminEmail = $settings->admin_email;
+
+            // Проверяем, что email администратора настроен
+            if (empty($adminEmail) || !filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+                Log::warning('Admin email not configured or invalid', [
+                    'admin_email' => $adminEmail
+                ]);
+                return false;
+            }
+
+            // Подготовка данных для администратора (включая email и phone пациента)
+            $data = $this->prepareAdminAppointmentData($appointment);
+
+            // Отправка email используя шаблон Winter CMS
+            Mail::send('doctor.appointments::mail.appointment_admin_cancelled', $data, function($message) use ($adminEmail) {
+                $message->to($adminEmail)
+                        ->subject('Consulta Cancelada pelo Paciente');
+            });
+
+            Log::info("Admin cancellation notification email sent successfully", [
+                'appointment_id' => $appointment->id,
+                'admin_email' => $adminEmail
+            ]);
+            
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error sending admin cancellation notification email', [
+                'appointment_id' => $appointment->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
+    }
+
+    /**
      * Отправить email администратору о новой записи
      *
      * @param Appointment $appointment
@@ -196,6 +242,10 @@ class NotificationService
      */
     protected function prepareAppointmentData(Appointment $appointment)
     {
+        // Генерируем токен и ссылку для просмотра/отмены консультации
+        $token = $appointment->generatePublicToken();
+        $viewUrl = url('appointment/' . $appointment->id . '/' . $token);
+        
         return [
             'patient_name' => $appointment->patient_name ?? 'Cliente',
             'appointment_time' => $appointment->appointment_time 
@@ -205,6 +255,7 @@ class NotificationService
                 ? $appointment->consultation_type->name 
                 : 'Não especificado',
             'description' => $appointment->description ?? null,
+            'view_url' => $viewUrl,
         ];
     }
 
