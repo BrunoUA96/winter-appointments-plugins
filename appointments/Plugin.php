@@ -1,6 +1,7 @@
 <?php namespace Doctor\Appointments;
 
 use System\Classes\PluginBase;
+use System\Classes\MailManager;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Winter\Storm\Support\Facades\Flash;
@@ -29,6 +30,13 @@ class Plugin extends PluginBase
 
     public function boot()
     {
+        // Регистрируем кастомный layout для email без футера
+        MailManager::instance()->registerCallback(function ($manager) {
+            $manager->registerMailLayouts([
+                'custom' => 'doctor.appointments::mail.layout-custom',
+            ]);
+        });
+
         Route::get('/google-callback', function () {
             try {
                 Log::info('Processing Google callback');

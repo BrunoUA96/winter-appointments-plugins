@@ -45,4 +45,9 @@ class Settings extends Model
     {
         return $this->get('google_redirect_uri');
     }
+
+    public function getAdminEmailAttribute()
+    {
+        return $this->get('admin_email');
+    }
 } 

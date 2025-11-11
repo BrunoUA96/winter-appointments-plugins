@@ -1,0 +1,59 @@
+layout = "custom"
+==
+Olá, {{ patient_name }}!
+
+Infelizmente, sua consulta foi cancelada.
+
+Detalhes da Consulta Cancelada:
+- Data e Hora: {{ appointment_time }}
+- Tipo de Consulta: {{ consultation_type }}
+{% if description %}
+- Descrição: {{ description }}
+{% endif %}
+
+Cancelamento: Sua consulta foi cancelada. Se você tiver alguma dúvida sobre o cancelamento ou desejar reagendar, entre em contato conosco.
+
+Se você tiver alguma dúvida ou desejar reagendar, entre em contato.
+
+Atenciosamente,
+Dra. Natalia Lazanovska
+==
+<div style="font-family: 'Poppins', Arial, sans-serif; line-height: 1.6; color: #332e2e; max-width: 600px; margin: 0 auto; padding: 0; background-color: #fff7f3;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #ffd3f3 0%, #ffd3f3 100%); padding: 20px 30px; text-align: center; box-shadow: 0px 0px 20px 1px rgba(255, 211, 243, 0.5);">
+        <h1 style="margin: 0; font-size: 1.3rem; font-weight: 600; color: #332e2e; font-family: 'Poppins', Arial, sans-serif;">Dr. Natalia Lazanovska</h1>
+    </div>
+    
+    <!-- Content -->
+    <div style="padding: 40px 30px; background: #fff7f3;">
+        <p style="margin: 0 0 20px 0; font-size: 1rem; color: #332e2e;">Olá, <strong style="color: #332e2e; font-weight: 600;">{{ patient_name }}</strong>!</p>
+        
+        <p style="margin: 0 0 25px 0; font-size: 1rem; color: #332e2e; line-height: 1.8;">Infelizmente, sua consulta foi <span style="display: inline-block; border-radius: 3rem; font-weight: 600;">cancelada</span>.</p>
+        
+        <p style="margin: 30px 0 20px 0; font-size: 0.95rem; color: #332e2e; line-height: 1.6;">Se você tiver alguma dúvida ou desejar reagendar, entre em contato.</p>
+
+        <!-- Details Box -->
+        <div style="background: white; padding: 25px; border-left: 4px solid #ffd3f3; margin: 25px 0; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+            <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; font-weight: 500; color: #332e2e; padding-bottom: 10px; border-bottom: 2px solid #ffd3f3; font-family: 'Poppins', Arial, sans-serif;">Detalhes da Consulta Cancelada:</h3>
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">Data e Hora:</strong> <span style="color: #332e2e;">{{ appointment_time }}</span>
+            </div>
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">Tipo de Consulta:</strong> <span style="color: #332e2e;">{{ consultation_type }}</span>
+            </div>
+            {% if description %}
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">Descrição:</strong> <span style="color: #332e2e;">{{ description }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <p style="margin: 0; font-size: 0.95rem; color: #332e2e; line-height: 1.6;">Atenciosamente,<br>
+        <strong style="color: #332e2e; font-weight: 600;">Dra. Natalia Lazanovska</strong></p>
+    </div>
+    
+    <!-- Footer -->
+    <div style="background: #ffd3f3; padding: 30px; text-align: center; box-shadow: 0px 0px 20px 1px rgba(255, 211, 243, 0.5);">
+        <p style="margin: 0; color: #332e2e; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.5px;">Este é um e-mail automático, por favor não responda.</p>
+    </div>
+</div>

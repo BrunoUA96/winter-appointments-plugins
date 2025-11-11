@@ -1,0 +1,75 @@
+layout = "custom"
+==
+Nova consulta agendada
+
+Uma nova consulta foi agendada e requer sua aprovação.
+
+Detalhes da Consulta:
+Nome do Paciente: {{ patient_name }}
+Email: {{ patient_email }}
+Telefone: {{ patient_phone }}
+Data e Hora: {{ appointment_time }}
+Tipo de Consulta: {{ consultation_type }}
+{% if description %}
+Descrição: {{ description }}
+{% endif %}
+
+Por favor, acesse o painel administrativo para aprovar ou cancelar esta consulta.
+
+Atenciosamente,
+Sistema de Agendamentos
+==
+<div style="font-family: 'Poppins', Arial, sans-serif; line-height: 1.6; color: #332e2e; max-width: 600px; margin: 0 auto; padding: 0; background-color: #fff7f3;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #ffd3f3 0%, #ffd3f3 100%); padding: 20px 30px; text-align: center; box-shadow: 0px 0px 20px 1px rgba(255, 211, 243, 0.5);">
+        <h1 style="margin: 0; font-size: 1.3rem; font-weight: 600; color: #332e2e; font-family: 'Poppins', Arial, sans-serif;">Nova Consulta Agendada</h1>
+    </div>
+    
+    <!-- Content -->
+    <div style="padding: 30px; background: #f9f9f9;">
+        <p style="margin: 0 0 20px 0; font-size: 1rem; color: #332e2e;">Olá, <strong style="color: #332e2e; font-weight: 600;">Dr. Natalia Lazanovska</strong>!</p>
+        
+        <p style="margin: 0 0 25px 0; font-size: 1rem; color: #332e2e; line-height: 1.8;">Uma nova consulta foi agendada e requer sua <span style="display: inline-block; border-radius: 3rem; font-weight: 600;">aprovação</span>.</p>
+        
+        <p style="margin: 30px 0 20px 0; font-size: 0.95rem; color: #332e2e; line-height: 1.6;">Por favor, acesse o painel administrativo para revisar e aprovar esta consulta.</p>
+
+        <!-- Details Box -->
+        <div style="background: white; padding: 25px; border-left: 4px solid #ffd3f3; margin: 25px 0; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+            <h3 style="margin: 0 0 20px 0; font-size: 1.2rem; font-weight: 500; color: #332e2e; padding-bottom: 10px; border-bottom: 2px solid #ffd3f3; font-family: 'Poppins', Arial, sans-serif;">Detalhes da Consulta:</h3>
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">Nome do Paciente:</strong> <span style="color: #332e2e;">{{ patient_name }}</span>
+            </div>
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">Email:</strong> <span style="color: #332e2e;">{{ patient_email }}</span>
+            </div>
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">Telefone:</strong> <span style="color: #332e2e;">{{ patient_phone }}</span>
+            </div>
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">Data e Hora:</strong> <span style="color: #332e2e;">{{ appointment_time }}</span>
+            </div>
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">Tipo de Consulta:</strong> <span style="color: #332e2e;">{{ consultation_type }}</span>
+            </div>
+            {% if description %}
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">Descrição:</strong> <span style="color: #332e2e;">{{ description }}</span>
+            </div>
+            {% endif %}
+            {% if appointment_id %}
+            <div style="margin: 15px 0; font-size: 0.95rem; color: #332e2e;">
+                <strong style="color: #332e2e; font-weight: 500;">ID da Consulta:</strong> <span style="color: #332e2e;">#{{ appointment_id }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <p style="margin: 0; font-size: 0.95rem; color: #332e2e; line-height: 1.6;">Atenciosamente,<br>
+        <strong style="color: #332e2e;">Sistema de Agendamentos</strong></p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: linear-gradient(135deg, #ffd3f3 0%, #ffd3f3 100%); padding: 20px 30px; text-align: center; box-shadow: 0px 0px 20px 1px rgba(255, 211, 243, 0.5);">
+        <p style="margin: 0; font-size: 0.85rem; color: #332e2e; opacity: 0.8;">Este é um e-mail automático, por favor não responda.</p>
+    </div>
+</div>
+

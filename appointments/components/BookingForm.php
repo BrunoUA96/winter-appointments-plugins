@@ -114,8 +114,8 @@ class BookingForm extends ComponentBase
             $appointment->status = 'pending'; // Устанавливаем статус "на рассмотрении"
             $appointment->save();
 
-            // Google Calendar событие будет создано автоматически в модели Appointment
-            // только когда статус записи изменится на "approved"
+            // Google Calendar событие и email уведомления будут созданы автоматически 
+            // в модели Appointment через afterSave() в зависимости от статуса
             Log::info('Appointment created with pending status');
 
             Flash::success('Consulta agendada com sucesso. Em breve você receberá um e-mail de confirmação.');

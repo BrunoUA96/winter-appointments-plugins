@@ -16,4 +16,9 @@ fields:
         type: partial
         path: $/doctor/appointments/models/settings/_connection_button.htm
         span: auto
-        cssClass: 'google-calendar-connection' 
+        cssClass: 'google-calendar-connection'
+    admin_email:
+        label: 'Email do Administrador'
+        type: email
+        comment: 'Email para receber notificações sobre novas consultas'
+        span: auto 

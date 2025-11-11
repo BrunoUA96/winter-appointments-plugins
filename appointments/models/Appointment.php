@@ -176,13 +176,45 @@ class Appointment extends Model
                 }
             }
             
-            // Отправляем уведомления (временно отключено)
-            // $notificationService = new \Doctor\Appointments\Services\NotificationService();
+            // Отправляем email уведомления в зависимости от статуса
+            $notificationService = new \Doctor\Appointments\Services\NotificationService();
             
-            // Отправляем подтверждение только для новых записей
-            if ($this->wasRecentlyCreated) {
-                // $notificationService->sendAppointmentConfirmation($this);
-                Log::info('Appointment confirmation would be sent here');
+            // Загружаем связи для email шаблонов
+            $this->load('consultation_type');
+            
+            // Отправляем email при создании новой записи (статус: pending)
+            if ($this->wasRecentlyCreated && $this->isPending()) {
+                try {
+                    // Отправляем email пациенту
+                    $notificationService->sendAppointmentConfirmation($this);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send appointment confirmation email: ' . $e->getMessage());
+                }
+                
+                try {
+                    // Отправляем email администратору
+                    $notificationService->sendAdminNotification($this);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send admin notification email: ' . $e->getMessage());
+                }
+            }
+            
+            // Отправляем email при изменении статуса на approved
+            if ($this->isApproved() && $this->wasChanged('status')) {
+                try {
+                    $notificationService->sendAppointmentApproved($this);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send appointment approved email: ' . $e->getMessage());
+                }
+            }
+            
+            // Отправляем email при изменении статуса на cancelled
+            if ($this->isCancelled() && $this->wasChanged('status')) {
+                try {
+                    $notificationService->sendAppointmentCancelled($this);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send appointment cancelled email: ' . $e->getMessage());
+                }
             }
             
             // Планируем отправку напоминания только для одобренных записей
