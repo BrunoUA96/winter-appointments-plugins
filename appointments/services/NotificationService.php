@@ -256,6 +256,7 @@ class NotificationService
                 : 'Não especificado',
             'description' => $appointment->description ?? null,
             'view_url' => $viewUrl,
+            'booking_url' => url('/booking'),
         ];
     }
 
