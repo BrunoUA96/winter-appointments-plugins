@@ -30,4 +30,10 @@ navigation:
                 label: 'Consultation Types'
                 url: doctor/appointments/consultationtypes
                 icon: icon-align-left
+            side-menu-working-hours:
+                label: 'Working Hours'
+                url: doctor/appointments/schedule
+                icon: icon-clock-o
+                permissions:
+                    - doctor.appointments.appointments
             

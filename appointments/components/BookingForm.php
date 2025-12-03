@@ -4,6 +4,7 @@ use Cms\Classes\ComponentBase;
 use Doctor\Appointments\Models\Appointment;
 use Doctor\Appointments\Models\ConsultationType;
 use Doctor\Appointments\Models\User;
+use Doctor\Appointments\Models\WorkingHours;
 use Illuminate\Support\Facades\Request;
 use Winter\Storm\Support\Facades\Flash;
 use Illuminate\Support\Facades\Log;
@@ -211,6 +212,198 @@ class BookingForm extends ComponentBase
         }
 
         return $times;
+    }
+
+    /**
+     * Получить доступные временные слоты для конкретной даты
+     */
+    public function onGetAvailableTimeSlots()
+    {
+        $date = Input::get('date');
+        $consultationTypeId = Input::get('consultation_type_id');
+        
+        if (!$date) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Date is required'
+            ]);
+        }
+
+        try {
+            $selectedDate = Carbon::parse($date);
+            
+            // Проверяем, что дата не в прошлом
+            if ($selectedDate->isPast() && !$selectedDate->isToday()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Não é possível selecionar uma data no passado'
+                ]);
+            }
+            
+            // Получаем длительность консультации, если указан тип
+            $duration = 30; // По умолчанию 30 минут
+            if ($consultationTypeId) {
+                $consultationType = ConsultationType::find($consultationTypeId);
+                if ($consultationType && $consultationType->duration) {
+                    $duration = (int)$consultationType->duration;
+                }
+            }
+            
+            $timeSlots = $this->getAvailableTimeSlotsForDate($selectedDate, $duration);
+            
+            // Проверяем, доступна ли дата (не является ли выходным днем)
+            $isDateAvailable = WorkingHours::isDateAvailable($selectedDate);
+            
+            return response()->json([
+                'success' => true,
+                'timeSlots' => $timeSlots,
+                'date' => $selectedDate->format('Y-m-d'),
+                'isDateAvailable' => $isDateAvailable
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting available time slots: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao obter horários disponíveis'
+            ]);
+        }
+    }
+
+    /**
+     * Получить список недоступных дат (выходные и отпуска)
+     */
+    public function onGetUnavailableDates()
+    {
+        try {
+            $unavailableDates = [];
+            
+            // Получаем все выходные дни (конкретные даты)
+            $dayOffs = WorkingHours::where('is_day_off', true)
+                ->whereNotNull('date')
+                ->get();
+            
+            foreach ($dayOffs as $dayOff) {
+                $unavailableDates[] = $dayOff->date->format('Y-m-d');
+            }
+            
+            // Получаем регулярные выходные дни недели на ближайшие 3 месяца
+            $regularDayOffs = WorkingHours::where('is_day_off', true)
+                ->whereNotNull('day_of_week')
+                ->whereNull('date')
+                ->pluck('day_of_week')
+                ->toArray();
+            
+            if (!empty($regularDayOffs)) {
+                $startDate = Carbon::today();
+                $endDate = Carbon::today()->addMonths(3);
+                
+                $currentDate = $startDate->copy();
+                while ($currentDate <= $endDate) {
+                    if (in_array($currentDate->dayOfWeek, $regularDayOffs)) {
+                        $unavailableDates[] = $currentDate->format('Y-m-d');
+                    }
+                    $currentDate->addDay();
+                }
+            }
+            
+            // Убеждаемся, что возвращаем массив и переиндексируем его
+            $unavailableDates = array_values(array_unique($unavailableDates));
+            
+            return response()->json([
+                'success' => true,
+                'unavailableDates' => $unavailableDates
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting unavailable dates: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao obter datas indisponíveis',
+                'unavailableDates' => []
+            ]);
+        }
+    }
+
+    /**
+     * Получить доступные временные слоты для конкретной даты с учетом длительности консультации
+     */
+    protected function getAvailableTimeSlotsForDate(Carbon $date, $duration = 30)
+    {
+        $timeSlots = [];
+        
+        // Проверяем, является ли дата выходным днем
+        if (WorkingHours::isDayOff($date)) {
+            return $timeSlots; // Возвращаем пустой массив для выходных дней
+        }
+        
+        // Получаем рабочие часы для этой даты
+        $startTime = WorkingHours::getStartTimeForDate($date);
+        $endTime = WorkingHours::getEndTimeForDate($date);
+        
+        // Парсим время начала и окончания работы
+        $startTimeParts = explode(':', $startTime);
+        $endTimeParts = explode(':', $endTime);
+        
+        $start = $date->copy()->setHour((int)$startTimeParts[0])->setMinute((int)$startTimeParts[1]);
+        $end = $date->copy()->setHour((int)$endTimeParts[0])->setMinute((int)$endTimeParts[1]);
+        
+        // Получаем все существующие записи на эту дату с их длительностью
+        $existingAppointments = Appointment::whereDate('appointment_time', $date->format('Y-m-d'))
+            ->whereIn('status', [Appointment::STATUS_PENDING, Appointment::STATUS_APPROVED])
+            ->with('consultation_type')
+            ->get()
+            ->map(function($appointment) {
+                $appointmentStart = Carbon::parse($appointment->appointment_time);
+                $appointmentDuration = $appointment->consultation_type ? (int)$appointment->consultation_type->duration : 30;
+                $appointmentEnd = $appointmentStart->copy()->addMinutes($appointmentDuration);
+                
+                return [
+                    'start' => $appointmentStart,
+                    'end' => $appointmentEnd,
+                    'start_time' => $appointmentStart->format('H:i'),
+                    'end_time' => $appointmentEnd->format('H:i')
+                ];
+            })
+            ->toArray();
+
+        while ($start <= $end) {
+            $timeString = $start->format('H:i');
+            $slotStart = $start->copy();
+            $slotEnd = $start->copy()->addMinutes($duration);
+            
+            // Проверяем, что слот не выходит за рабочие часы
+            if ($slotEnd > $end) {
+                // Если слот выходит за рабочие часы, пропускаем его
+                $start->addMinutes(30);
+                continue;
+            }
+            
+            // Проверяем, не перекрывается ли этот слот с существующими консультациями
+            $isAvailable = true;
+            
+            foreach ($existingAppointments as $appointment) {
+                $appointmentStart = $appointment['start'];
+                $appointmentEnd = $appointment['end'];
+                
+                // Проверяем перекрытие: новый слот не должен перекрываться с существующими
+                // Слот доступен, если он начинается после окончания существующей консультации
+                // или заканчивается до начала существующей консультации
+                // Если есть перекрытие (не выполняется условие выше), слот недоступен
+                if (!($slotEnd <= $appointmentStart || $slotStart >= $appointmentEnd)) {
+                    $isAvailable = false;
+                    break;
+                }
+            }
+            
+            $timeSlots[] = [
+                'time' => $timeString,
+                'display' => $start->format('H:i'),
+                'available' => $isAvailable
+            ];
+            
+            $start->addMinutes(30);
+        }
+
+        return $timeSlots;
     }
 
     // Google Calendar события теперь создаются автоматически в модели Appointment

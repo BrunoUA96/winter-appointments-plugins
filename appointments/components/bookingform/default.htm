@@ -75,6 +75,8 @@
                                                 id="patient_name"
                                                 name="patient_name"
                                                 required
+                                                aria-required="true"
+                                                aria-describedby="patient_name-error"
                                             />
                                         </div>
                                         <div class="form-group">
@@ -85,18 +87,22 @@
                                                 id="email"
                                                 name="email"
                                                 required
+                                                aria-required="true"
+                                                aria-describedby="email-error"
                                             />
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label for="phone">Telefone</label>
-                                        <input
-                                            type="tel"
-                                            class="form-control"
-                                            id="phone"
-                                            name="phone"
-                                            required
-                                        />
+                                            <input
+                                                type="tel"
+                                                class="form-control"
+                                                id="phone"
+                                                name="phone"
+                                                required
+                                                aria-required="true"
+                                                aria-describedby="phone-error"
+                                            />
                                     </div>
                                 </div>
 
@@ -108,6 +114,8 @@
                                             id="consultation_type_id"
                                             name="consultation_type_id"
                                             required
+                                            aria-required="true"
+                                            aria-describedby="consultation_type_id-error"
                                         >
                                             <option value="">
                                                 Selecione o tipo de consulta
@@ -124,42 +132,33 @@
 
                                 <div class="form-section">
                                     <h3>Data e hora</h3>
-                                    <div class="date-time-row">
-                                        <div class="form-group">
-                                            <label for="appointment_date"
-                                                >Data da consulta</label
-                                            >
-                                            <input
-                                                type="date"
-                                                class="form-control date-input"
-                                                id="appointment_date"
-                                                name="appointment_date"
-                                                min="{{ 'now'|date('Y-m-d') }}"
-                                                required
-                                            />
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="appointment_time"
-                                                >Hora da consulta</label
-                                            >
-                                            <select
-                                                class="form-control time-select"
-                                                id="appointment_time"
-                                                name="appointment_time"
-                                                required
-                                            >
-                                                <option value="">
-                                                    Selecione a hora
-                                                </option>
-                                                {% for time in availableTimes %}
-                                                <option
-                                                    value="{{ time|date('H:i') }}"
-                                                >
-                                                    {{ time|date('H:i') }}
-                                                </option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
+                                    
+                                    <!-- Скрытые поля для отправки формы -->
+                                    <input
+                                        type="hidden"
+                                        id="appointment_date"
+                                        name="appointment_date"
+                                        required
+                                        aria-required="true"
+                                    />
+                                    <input
+                                        type="hidden"
+                                        id="appointment_time"
+                                        name="appointment_time"
+                                        required
+                                        aria-required="true"
+                                    />
+                                    
+                                    <!-- Календарь -->
+                                    <div class="form-group calendar-group">
+                                        <label>Selecione a data</label>
+                                        <div id="calendar-container" class="calendar-container"></div>
+                                    </div>
+                                    
+                                    <!-- Временные слоты -->
+                                    <div class="form-group time-slots-group">
+                                        <label>Selecione o horário</label>
+                                        <div id="time-slots-container" class="time-slots-container"></div>
                                     </div>
                                 </div>
 
@@ -175,7 +174,12 @@
                                             name="description"
                                             rows="3"
                                             placeholder="Descreva seus sintomas ou motivos para a consulta..."
+                                            aria-describedby="description-error description-help"
+                                            maxlength="1000"
                                         ></textarea>
+                                        <small id="description-help" class="form-text text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">
+                                            Máximo de 1000 caracteres
+                                        </small>
                                     </div>
                                 </div>
 
@@ -199,119 +203,133 @@
                                         class="btn btn-pink btn-booking"
                                         id="confirmBtn"
                                         onclick="showConfirmationModal()"
+                                        aria-label="Confirmar agendamento da consulta"
                                     >
                                         Confirmar agendamento
                                     </button>
                                 </div>
-                                <!-- Модальное окно подтверждения -->
-                                <div id="confirmationModal" class="modal">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h2>Confirmação de agendamento</h2>
-                                            <span
-                                                class="close"
-                                                onclick="closeConfirmationModal()"
-                                                >&times;</span
-                                            >
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="confirmation-preview">
-                                                <div class="preview-section">
-                                                    <h3>Dados pessoais</h3>
-                                                    <div class="preview-item">
-                                                        <span
-                                                            class="preview-label"
-                                                            >Nome:</span
-                                                        >
-                                                        <span
-                                                            class="preview-value"
-                                                            id="preview-name"
-                                                        ></span>
-                                                    </div>
-                                                    <div class="preview-item">
-                                                        <span
-                                                            class="preview-label"
-                                                            >Email:</span
-                                                        >
-                                                        <span
-                                                            class="preview-value"
-                                                            id="preview-email"
-                                                        ></span>
-                                                    </div>
-                                                    <div class="preview-item">
-                                                        <span
-                                                            class="preview-label"
-                                                            >Telefone:</span
-                                                        >
-                                                        <span
-                                                            class="preview-value"
-                                                            id="preview-phone"
-                                                        ></span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="preview-section">
-                                                    <h3>
-                                                        Detalhes da consulta
-                                                    </h3>
-                                                    <div class="preview-item">
-                                                        <span
-                                                            class="preview-label"
-                                                            >Tipo de
-                                                            consulta:</span
-                                                        >
-                                                        <span
-                                                            class="preview-value"
-                                                            id="preview-consultation"
-                                                        ></span>
-                                                    </div>
-                                                    <div class="preview-item">
-                                                        <span
-                                                            class="preview-label"
-                                                            >Data:</span
-                                                        >
-                                                        <span
-                                                            class="preview-value"
-                                                            id="preview-date"
-                                                        ></span>
-                                                    </div>
-                                                    <div class="preview-item">
-                                                        <span
-                                                            class="preview-label"
-                                                            >Hora:</span
-                                                        >
-                                                        <span
-                                                            class="preview-value"
-                                                            id="preview-time"
-                                                        ></span>
-                                                    </div>
-                                                    <div
-                                                        class="preview-item"
-                                                        id="preview-description-container"
-                                                        style="display: none"
+                            </form>
+                            
+                            <!-- Модальное окно подтверждения -->
+                            <div 
+                                id="confirmationModal" 
+                                class="modal"
+                                role="dialog"
+                                aria-labelledby="modal-title"
+                                aria-modal="true"
+                                aria-hidden="true"
+                                tabindex="-1"
+                            >
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h2 id="modal-title">Confirmação de agendamento</h2>
+                                        <button
+                                            type="button"
+                                            class="close"
+                                            onclick="closeConfirmationModal()"
+                                            aria-label="Fechar modal"
+                                            tabindex="0"
+                                        >&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="confirmation-preview">
+                                            <div class="preview-section">
+                                                <h3>Dados pessoais</h3>
+                                                <div class="preview-item">
+                                                    <span
+                                                        class="preview-label"
+                                                        >Nome:</span
                                                     >
-                                                        <span
-                                                            class="preview-label"
-                                                            >Descrição:</span
-                                                        >
-                                                        <span
-                                                            class="preview-value"
-                                                            id="preview-description"
-                                                        ></span>
-                                                    </div>
+                                                    <span
+                                                        class="preview-value"
+                                                        id="preview-name"
+                                                    ></span>
+                                                </div>
+                                                <div class="preview-item">
+                                                    <span
+                                                        class="preview-label"
+                                                        >Email:</span
+                                                    >
+                                                    <span
+                                                        class="preview-value"
+                                                        id="preview-email"
+                                                    ></span>
+                                                </div>
+                                                <div class="preview-item">
+                                                    <span
+                                                        class="preview-label"
+                                                        >Telefone:</span
+                                                    >
+                                                    <span
+                                                        class="preview-value"
+                                                        id="preview-phone"
+                                                    ></span>
                                                 </div>
                                             </div>
 
-                                            <div class="confirmation-notice">
-                                                <div class="notice-text">
-                                                    <strong>Importante:</strong>
-                                                    Por favor, certifique-se de
-                                                    que todos os dados estão
-                                                    corretos.
+                                            <div class="preview-section">
+                                                <h3>
+                                                    Detalhes da consulta
+                                                </h3>
+                                                <div class="preview-item">
+                                                    <span
+                                                        class="preview-label"
+                                                        >Tipo de
+                                                        consulta:</span
+                                                    >
+                                                    <span
+                                                        class="preview-value"
+                                                        id="preview-consultation"
+                                                    ></span>
+                                                </div>
+                                                <div class="preview-item">
+                                                    <span
+                                                        class="preview-label"
+                                                        >Data:</span
+                                                    >
+                                                    <span
+                                                        class="preview-value"
+                                                        id="preview-date"
+                                                    ></span>
+                                                </div>
+                                                <div class="preview-item">
+                                                    <span
+                                                        class="preview-label"
+                                                        >Hora:</span
+                                                    >
+                                                    <span
+                                                        class="preview-value"
+                                                        id="preview-time"
+                                                    ></span>
+                                                </div>
+                                                <div
+                                                    class="preview-item"
+                                                    id="preview-description-container"
+                                                    style="display: none"
+                                                >
+                                                    <span
+                                                        class="preview-label"
+                                                        >Descrição:</span
+                                                    >
+                                                    <span
+                                                        class="preview-value"
+                                                        id="preview-description"
+                                                    ></span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="modal-footer">
+
+                                        <div class="confirmation-notice">
+                                            <div class="notice-text">
+                                                <strong>Importante:</strong>
+                                                Por favor, certifique-se de
+                                                que todos os dados estão
+                                                corretos.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form id="modal-form">
                                             <button
                                                 type="submit"
                                                 class="btn btn-pink btn-booking"
@@ -319,10 +337,10 @@
                                             >
                                                 Confirmar agendamento
                                             </button>
-                                        </div>
+                                        </form>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
                         </div>
 
                         <div class="booking-info-section">

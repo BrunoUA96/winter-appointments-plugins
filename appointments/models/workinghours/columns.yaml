@@ -1,0 +1,26 @@
+columns:
+    id:
+        label: ID
+        searchable: true
+    day_of_week:
+        label: 'Day of Week'
+        type: text
+        formatter: 'Doctor\Appointments\Models\WorkingHours::formatDayOfWeek'
+    date:
+        label: Date
+        type: date
+        format: Y-m-d
+    is_day_off:
+        label: 'Day Off'
+        type: switch
+    start_time:
+        label: 'Start Time'
+        type: time
+    end_time:
+        label: 'End Time'
+        type: time
+    created_at:
+        label: 'Created'
+        type: datetime
+        invisible: true
+

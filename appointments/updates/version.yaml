@@ -36,3 +36,9 @@
 1.0.13:
     - 'Add cancelled_by_patient status to appointments'
     - add_cancelled_by_patient_status.php
+1.0.14:
+    - 'Created table doctor_appointments_working_hours'
+    - create_working_hours_table.php
+1.0.15:
+    - 'Add end_date field to working_hours for vacation ranges'
+    - add_end_date_to_working_hours.php

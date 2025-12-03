@@ -1,0 +1,12 @@
+name: WorkingHours
+modelClass: Doctor\Appointments\Models\WorkingHours
+form: $/doctor/appointments/models/workinghours/fields.yaml
+defaultRedirect: doctor/appointments/schedule
+create:
+    redirect: 'doctor/appointments/schedule/update/:id'
+    redirectClose: doctor/appointments/schedule
+update:
+    redirect: doctor/appointments/schedule
+    redirectClose: doctor/appointments/schedule
+preview: {  }
+

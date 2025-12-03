@@ -1,0 +1,79 @@
+fields:
+    type:
+        label: 'Type'
+        span: auto
+        type: dropdown
+        options:
+            regular: 'Regular Day of Week'
+            specific: 'Specific Date'
+        default: regular
+        comment: 'Select whether this is a regular weekly schedule or a specific date'
+    day_of_week:
+        label: 'Day of Week'
+        span: auto
+        type: dropdown
+        options:
+            0: Sunday
+            1: Monday
+            2: Tuesday
+            3: Wednesday
+            4: Thursday
+            5: Friday
+            6: Saturday
+        dependsOn: type
+        trigger:
+            action: show
+            field: type
+            condition: value[regular]
+        comment: 'Select day of week for regular schedule'
+    date:
+        label: 'Date'
+        span: auto
+        type: datepicker
+        mode: date
+        dependsOn: type
+        trigger:
+            action: show
+            field: type
+            condition: value[specific]
+        comment: 'Select specific date for day off or schedule override'
+    end_date:
+        label: 'End Date (for vacation range)'
+        span: auto
+        type: datepicker
+        mode: date
+        dependsOn: type
+        trigger:
+            action: show
+            field: type
+            condition: value[specific]
+        comment: 'Select end date for vacation range (only for day off/vacation, leave empty for single day)'
+    is_day_off:
+        label: 'Day Off / Vacation'
+        span: auto
+        type: checkbox
+        default: false
+        comment: 'Check if this is a day off or vacation day'
+    start_time:
+        label: 'Start Time'
+        span: auto
+        type: datepicker
+        mode: time
+        dependsOn: is_day_off
+        trigger:
+            action: hide
+            field: is_day_off
+            condition: checked
+        comment: 'Working hours start time (leave empty for day off)'
+    end_time:
+        label: 'End Time'
+        span: auto
+        type: datepicker
+        mode: time
+        dependsOn: is_day_off
+        trigger:
+            action: hide
+            field: is_day_off
+            condition: checked
+        comment: 'Working hours end time (leave empty for day off)'
+
