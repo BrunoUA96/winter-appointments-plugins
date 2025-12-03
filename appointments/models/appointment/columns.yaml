@@ -15,22 +15,15 @@ columns:
         label: Phone
         type: text
         searchable: true
-    birth_date:
-        label: 'Data de nascimento'
-        type: date
     appointment_time:
         label: Appointment time
         type: text
         searchable: true
-    consultation_type:
-        label: Consultation type
-        relation: consultation_type
-        select: name
-        searchable: true
-    consultation_reason:
-        label: 'Motivo da consulta'
-        type: text
-        searchable: true
+    # consultation_type:
+    #     label: Consultation type
+    #     relation: consultation_type
+    #     select: name
+    #     searchable: true
     status:
         label: Status
         type: partial
