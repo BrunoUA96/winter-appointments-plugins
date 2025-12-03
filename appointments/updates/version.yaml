@@ -42,3 +42,6 @@
 1.0.15:
     - 'Add end_date field to working_hours for vacation ranges'
     - add_end_date_to_working_hours.php
+1.0.16:
+    - 'Add patient fields to appointments (consultation_reason, sns_number, nif, birth_date, health_insurance)'
+    - add_patient_fields_to_appointments.php

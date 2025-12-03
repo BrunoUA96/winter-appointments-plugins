@@ -51,17 +51,17 @@
                             consulta
                         </p>
                     </div>
+                    <form
+                        data-request="onSaveBooking"
+                        data-request-validate
+                        data-request-success="handleSuccess"
+                        data-request-error="handleError"
+                        data-request-update="'@default': ''"
+                        data-request-flash
+                        data-request-data="{}"
+                    >
                     <div class="booking-content">
                         <div class="booking-form-section">
-                            <form
-                                data-request="onSaveBooking"
-                                data-request-validate
-                                data-request-success="handleSuccess"
-                                data-request-error="handleError"
-                                data-request-update="'@default': ''"
-                                data-request-flash
-                                data-request-data="{}"
-                            >
                                 <div class="form-section">
                                     <h3>Dados pessoais</h3>
                                     <div class="form-row">
@@ -92,8 +92,9 @@
                                             />
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="phone">Telefone</label>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="phone">Telefone</label>
                                             <input
                                                 type="tel"
                                                 class="form-control"
@@ -103,81 +104,72 @@
                                                 aria-required="true"
                                                 aria-describedby="phone-error"
                                             />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="birth_date">Data de nascimento</label>
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                                id="birth_date"
+                                                name="birth_date"
+                                                required
+                                                aria-required="true"
+                                                aria-describedby="birth_date-error"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div class="form-section">
-                                    <h3>Tipo de consulta</h3>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="sns_number">Número de utente (SNS)</label>
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                id="sns_number"
+                                                name="sns_number"
+                                                aria-describedby="sns_number-error"
+                                            />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="nif">NIF</label>
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                id="nif"
+                                                name="nif"
+                                                aria-describedby="nif-error"
+                                            />
+                                        </div>
+                                    </div>
                                     <div class="form-group">
-                                        <select
-                                            class="form-control consultation-select"
-                                            id="consultation_type_id"
-                                            name="consultation_type_id"
-                                            required
-                                            aria-required="true"
-                                            aria-describedby="consultation_type_id-error"
-                                        >
-                                            <option value="">
-                                                Selecione o tipo de consulta
-                                            </option>
-                                            {% for id, name in consultationTypes
-                                            %}
-                                            <option value="{{ id }}">
-                                                {{ name }}
-                                            </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-section">
-                                    <h3>Data e hora</h3>
-                                    
-                                    <!-- Скрытые поля для отправки формы -->
-                                    <input
-                                        type="hidden"
-                                        id="appointment_date"
-                                        name="appointment_date"
-                                        required
-                                        aria-required="true"
-                                    />
-                                    <input
-                                        type="hidden"
-                                        id="appointment_time"
-                                        name="appointment_time"
-                                        required
-                                        aria-required="true"
-                                    />
-                                    
-                                    <!-- Календарь -->
-                                    <div class="form-group calendar-group">
-                                        <label>Selecione a data</label>
-                                        <div id="calendar-container" class="calendar-container"></div>
-                                    </div>
-                                    
-                                    <!-- Временные слоты -->
-                                    <div class="form-group time-slots-group">
-                                        <label>Selecione o horário</label>
-                                        <div id="time-slots-container" class="time-slots-container"></div>
+                                        <label for="health_insurance">Seguro de saúde</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="health_insurance"
+                                            name="health_insurance"
+                                            aria-describedby="health_insurance-error"
+                                        />
                                     </div>
                                 </div>
 
                                 <div class="form-section">
                                     <h3>Informações adicionais</h3>
                                     <div class="form-group">
-                                        <label for="description"
-                                            >Descrição (opcional)</label
+                                        <label for="consultation_reason"
+                                            >Motivo da consulta</label
                                         >
                                         <textarea
                                             class="form-control"
-                                            id="description"
-                                            name="description"
+                                            id="consultation_reason"
+                                            name="consultation_reason"
                                             rows="3"
-                                            placeholder="Descreva seus sintomas ou motivos para a consulta..."
-                                            aria-describedby="description-error description-help"
+                                            placeholder="Descreva o motivo da sua consulta..."
+                                            required
+                                            aria-required="true"
+                                            aria-describedby="consultation_reason-error consultation_reason-help"
                                             maxlength="1000"
                                         ></textarea>
-                                        <small id="description-help" class="form-text text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">
+                                        <small id="consultation_reason-help" class="form-text text-muted" style="display: block; margin-top: 6px; font-size: 0.85rem;">
                                             Máximo de 1000 caracteres
                                         </small>
                                     </div>
@@ -188,7 +180,6 @@
                                         <div
                                             class="g-recaptcha"
                                             data-sitekey="{{ recaptcha_site_key }}"
-                                            data-callback="onRecaptchaSuccess"
                                         ></div>
                                         <div
                                             class="invalid-feedback"
@@ -208,7 +199,6 @@
                                         Confirmar agendamento
                                     </button>
                                 </div>
-                            </form>
                             
                             <!-- Модальное окно подтверждения -->
                             <div 
@@ -304,16 +294,15 @@
                                                 </div>
                                                 <div
                                                     class="preview-item"
-                                                    id="preview-description-container"
-                                                    style="display: none"
+                                                    id="preview-consultation-reason-container"
                                                 >
                                                     <span
                                                         class="preview-label"
-                                                        >Descrição:</span
+                                                        >Motivo da consulta:</span
                                                     >
                                                     <span
                                                         class="preview-value"
-                                                        id="preview-description"
+                                                        id="preview-consultation-reason"
                                                     ></span>
                                                 </div>
                                             </div>
@@ -331,8 +320,10 @@
                                     <div class="modal-footer">
                                         <form id="modal-form">
                                             <button
-                                                type="submit"
+                                                type="button"
                                                 class="btn btn-pink btn-booking"
+                                                id="modal-submit-btn"
+                                                onclick="submitBookingForm()"
                                                 data-attach-loading
                                             >
                                                 Confirmar agendamento
@@ -342,8 +333,69 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="booking-info-section">
+                            <!-- Карточка с выбором типа консультации и даты/времени -->
+                            <div class="info-card booking-selection-card">
+                                <!-- Скрытые поля для отправки формы -->
+                                <input
+                                    type="hidden"
+                                    id="appointment_date"
+                                    name="appointment_date"
+                                    required
+                                    aria-required="true"
+                                />
+                                <input
+                                    type="hidden"
+                                    id="appointment_time"
+                                    name="appointment_time"
+                                    required
+                                    aria-required="true"
+                                />
+                                
+                                <div class="info-header">
+                                    <h3>Tipo de consulta</h3>
+                                </div>
+                                <div class="info-content">
+                                    <div class="form-group">
+                                        <select
+                                            class="form-control consultation-select"
+                                            id="consultation_type_id"
+                                            name="consultation_type_id"
+                                            required
+                                            aria-required="true"
+                                            aria-describedby="consultation_type_id-error"
+                                        >
+                                            <option value="">
+                                                Selecione o tipo de consulta
+                                            </option>
+                                            {% for id, name in consultationTypes
+                                            %}
+                                            <option value="{{ id }}">
+                                                {{ name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-header" style="margin-top: 24px;">
+                                    <h3>Data e hora</h3>
+                                </div>
+                                <div class="info-content">
+                                    <!-- Календарь -->
+                                    <div class="form-group calendar-group">
+                                        <label>Selecione a data</label>
+                                        <div id="calendar-container" class="calendar-container"></div>
+                                    </div>
+                                    
+                                    <!-- Временные слоты -->
+                                    <div class="form-group time-slots-group">
+                                        <label>Selecione o horário</label>
+                                        <div id="time-slots-container" class="time-slots-container"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="info-card">
                                 <div class="info-header">
                                     <h3>📋 Informações sobre o agendamento</h3>
@@ -381,6 +433,10 @@
                             </div>
                         </div>
                     </div>
+                    </div>
+
+                    
+                    </form>
                 </div>
             </div>
         </div>

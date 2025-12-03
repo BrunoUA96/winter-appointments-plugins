@@ -14,7 +14,7 @@ class Appointment extends Model
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_CANCELLED_BY_PATIENT = 'cancelled_by_patient';
 
-    protected $dates = ["deleted_at"];
+    protected $dates = ["deleted_at", "birth_date"];
     private static $isSyncing = false;
     
     /**
@@ -34,6 +34,11 @@ class Appointment extends Model
         "appointment_time",
         "consultation_type_id",
         "description",
+        "consultation_reason",
+        "sns_number",
+        "nif",
+        "birth_date",
+        "health_insurance",
         "google_event_id",
         "email",
         "phone",

@@ -3,34 +3,52 @@ fields:
         label: Name
         span: auto
         type: text
-    appointment_time:
-        label: 'Appointment time'
-        mode: datetime
+    email:
+        label: Email
         span: auto
-        type: datepicker
+        type: text
     phone:
         label: Phone
         span: auto
         type: text
-    email:
-        label: Email
+    birth_date:
+        label: 'Data de nascimento'
+        span: auto
+        type: datepicker
+        mode: date
+    sns_number:
+        label: 'Número de utente (SNS)'
+        span: auto
+        type: text
+    nif:
+        label: NIF
+        span: auto
+        type: text
+    health_insurance:
+        label: 'Seguro de saúde'
         span: auto
         type: text
     consultation_type:
         label: 'Consultation type'
         span: auto
         type: dropdown
-    created_at:
-        label: 'Created at'
+    appointment_time:
+        label: 'Appointment time'
         mode: datetime
         span: auto
         type: datepicker
-    description:
-        label: Description
-        span: auto
+    consultation_reason:
+        label: 'Motivo da consulta'
+        span: full
         type: textarea
+        size: large
     status:
         label: 'Status'
         span: auto
         type: dropdown
         options: getStatusOptions
+    created_at:
+        label: 'Created at'
+        mode: datetime
+        span: auto
+        type: datepicker

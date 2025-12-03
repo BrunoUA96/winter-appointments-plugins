@@ -7,6 +7,17 @@ columns:
         label: Patient name
         type: text
         searchable: true
+    email:
+        label: Email
+        type: text
+        searchable: true
+    phone:
+        label: Phone
+        type: text
+        searchable: true
+    birth_date:
+        label: 'Data de nascimento'
+        type: date
     appointment_time:
         label: Appointment time
         type: text
@@ -15,6 +26,10 @@ columns:
         label: Consultation type
         relation: consultation_type
         select: name
+        searchable: true
+    consultation_reason:
+        label: 'Motivo da consulta'
+        type: text
         searchable: true
     status:
         label: Status

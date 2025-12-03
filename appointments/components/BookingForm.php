@@ -5,7 +5,6 @@ use Doctor\Appointments\Models\Appointment;
 use Doctor\Appointments\Models\ConsultationType;
 use Doctor\Appointments\Models\User;
 use Doctor\Appointments\Models\WorkingHours;
-use Illuminate\Support\Facades\Request;
 use Winter\Storm\Support\Facades\Flash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -40,7 +39,6 @@ class BookingForm extends ComponentBase
     public function onRun()
     {
         $this->page['consultationTypes'] = ConsultationType::all()->pluck('name', 'id');
-        $this->page['availableTimes'] = $this->getAvailableTimes();
         
         // Получаем ключ reCAPTCHA из настроек
         $settings = \Doctor\Appointments\Models\Settings::instance();
@@ -68,6 +66,11 @@ class BookingForm extends ComponentBase
                 'appointment_time' => 'required|date',
                 'email' => 'required|email',
                 'phone' => 'required',
+                'birth_date' => 'required|date|before:today|date_format:Y-m-d',
+                'consultation_reason' => 'required|string|max:1000',
+                'sns_number' => 'nullable|string|max:50',
+                'nif' => 'nullable|string|max:20',
+                'health_insurance' => 'nullable|string|max:100',
                 'g-recaptcha-response' => 'required'
             ];
 
@@ -196,23 +199,6 @@ class BookingForm extends ComponentBase
         }
     }
 
-    // Google Calendar аутентификация теперь обрабатывается в отдельном сервисе
-
-    protected function getAvailableTimes()
-    {
-        $times = [];
-        $start = Carbon::today()->setHour(9)->setMinute(0);
-        $end = Carbon::today()->setHour(17)->setMinute(0);
-
-        while ($start <= $end) {
-            if (!Appointment::where('appointment_time', $start)->exists()) {
-                $times[] = $start->format('Y-m-d H:i');
-            }
-            $start->addMinutes(30);
-        }
-
-        return $times;
-    }
 
     /**
      * Получить доступные временные слоты для конкретной даты
