@@ -1,0 +1,18 @@
+plugin:
+    name: 'doctor.home::lang.plugin.name'
+    description: 'doctor.home::lang.plugin.description'
+    author: doctor
+    icon: 'icon-home'
+    replaces: {  }
+navigation:
+    main-menu-item:
+        label: Home Content
+        url: doctor/home/settings
+        icon: icon-home
+        permissions:
+            - doctor.home.manage_content
+permissions:
+    doctor.home.manage_content:
+        tab: 'doctor.home::lang.plugin.name'
+        label: 'doctor.home::lang.plugin.name'
+

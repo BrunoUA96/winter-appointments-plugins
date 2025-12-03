@@ -1,0 +1,5 @@
+name: Home Content Settings
+modelClass: Doctor\Home\Models\HomeSettings
+form: $/doctor/home/models/homesettings/fields.yaml
+defaultRedirect: doctor/home/settings
+

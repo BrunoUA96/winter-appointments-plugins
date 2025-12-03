@@ -1,0 +1,24 @@
+{% if banner %}
+<div class="container-fluid px-o welcome">
+    <div class="row h-100">
+        <div
+            class="col-6 d-flex flex-column justify-content-center align-items-baseline welcome-content"
+        >
+            {% if banner.title %}
+                <h1>{{ banner.title }}</h1>
+            {% endif %}
+            {% if banner.subtitle %}
+                <h6>
+                    {{ banner.subtitle }}
+                </h6>
+            {% endif %}
+        </div>
+        {% if banner.image %}
+        <div class="col-6 pe-0 welcome-image-box h-100">
+            <img src="{{ banner.image|media }}" alt="{{ banner.title }}" />
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+

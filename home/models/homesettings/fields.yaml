@@ -1,0 +1,52 @@
+tabs:
+    stretch: true
+    icons:
+        'Banner Settings': icon-image
+        'Consultation Section': icon-list
+    fields:
+        banner_title:
+            label: 'Banner Title'
+            span: auto
+            type: text
+            comment: 'Main heading for the banner'
+            tab: 'Banner Settings'
+        
+        banner_subtitle:
+            label: 'Banner Subtitle'
+            span: auto
+            type: textarea
+            size: small
+            comment: 'Subtitle or description for the banner'
+            tab: 'Banner Settings'
+        
+        banner_image:
+            label: 'Banner Image'
+            mode: image
+            span: full
+            type: mediafinder
+            comment: 'Image displayed in the banner'
+            tab: 'Banner Settings'
+        
+        consultation_title:
+            label: 'Section Title'
+            span: auto
+            type: text
+            comment: 'Title for the consultation section'
+            tab: 'Consultation Section'
+        
+        consultation_subtitle:
+            label: 'Section Subtitle'
+            span: auto
+            type: textarea
+            size: small
+            comment: 'Subtitle for the consultation section'
+            tab: 'Consultation Section'
+        
+        consultation_type_ids:
+            label: 'Consultation Types'
+            span: full
+            type: checkboxlist
+            options: getConsultationTypeOptions
+            comment: 'Select consultation types to display on the home page'
+            tab: 'Consultation Section'
+

@@ -1,0 +1,35 @@
+{% if consultationSection and consultationSection.title %}
+<div class="container consultation my-5">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h5>{{ consultationSection.title }}</h5>
+            {% if consultationSection.subtitle %}
+                <span>{{ consultationSection.subtitle }}</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        {% if consultationTypes and consultationTypes.count > 0 %}
+            {% for consultationType in consultationTypes %}
+                <div class="col-3">
+                    <div class="consultation-card">
+                        <div class="consultation-card-text-box">
+                            {% if consultationType.name %}
+                                <h6>{{ consultationType.name }}</h6>
+                            {% endif %}
+                            {% if consultationType.features_array and consultationType.features_array|length > 0 %}
+                                <span>
+                                    {% for feature in consultationType.features_array %}
+                                        {{ feature }}{% if not loop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
